@@ -1,0 +1,71 @@
+80	ADD B	A←(B) + (A)
+81	ADD C	A←(C) + (A)
+82	ADD D	A←(D) + (A)
+83	ADD E	A←(E) + (A)
+84	ADD H	A←(H) + (A)
+85	ADD L	A←(L) + (A)
+86	ADD M	A←Loc(HL) + (A)
+87	ADD A	A←(A) + (A)
+
+88	ADC B	A←(B) + (A) + CY
+89	ADC C	A←(C) + (A) + CY
+8A	ADC D	A←(D) + (A) + CY
+8B	ADC E	A←(E) + (A) + CY
+8C	ADC H	A←(H) + (A) + CY
+8D	ADC L	A←(L) + (A) + CY
+8E	ADC M	A←Loc(HL) + (A) + CY
+8F	ADC A	A←(A) + (A) + CY
+
+90	SUB B	Вычесть B из А
+91	SUB C	Вычесть C из А
+92	SUB D	Вычесть D из А
+93	SUB E	Вычесть E из А
+94	SUB H	Вычесть H из А
+95	SUB L	Вычесть L из А
+96	SUB M	Вычесть M из А
+97	SUB A	Вычесть А из А (очистить А)
+
+98	SBB B	Вычесть c заёмом B из А
+99	SBB C	Вычесть c заёмом C из А
+9A	SBB D	Вычесть c заёмом D из А
+9B	SBB E	Вычесть c заёмом E из А
+9C	SBB H	Вычесть c заёмом H из А
+9D	SBB L	Вычесть c заёмом L из А
+9E	SBB M	Вычесть c заёмом M из А
+9F	SBB A	Вычесть А из А (очистить А)
+
+A0	ANA B	Логическое И B с A
+A1	ANA C	Логическое И C с A
+A2	ANA D	Логическое И D с A
+A3	ANA E	Логическое И E с A
+A4	ANA H	Логическое И H с A
+A5	ANA L	Логическое И L с A
+A6	ANA M	Логическое И Loc(HL) с A
+A7	ANA A	Проверка A
+
+A8	XRA B	Исключающее ИЛИ B с A
+A9	XRA C	Исключающее ИЛИ C с A
+AA	XRA D	Исключающее ИЛИ D с A
+AB	XRA E	Исключающее ИЛИ E с A
+AC	XRA H	Исключающее ИЛИ H с A
+AD	XRA L	Исключающее ИЛИ L с A
+AE	XRA M	Исключающее ИЛИ Loc(HL) с A
+AF	XRA A	Исключающее ИЛИ A с A (очистка A)
+
+B0	ORA B	Логичеcкая операция A ИЛИ B
+B1	ORA C	Логичеcкая операция A ИЛИ C
+B2	ORA D	Логичеcкая операция A ИЛИ D
+B3	ORA E	Логичеcкая операция A ИЛИ E
+B4	ORA H	Логичеcкая операция A ИЛИ H
+B5	ORA L	Логичеcкая операция A ИЛИ L
+B6	ORA M	Логичеcкая операция A ИЛИ M
+B7	ORA A	Проверить A и сбросить перенос
+
+B8	CMP B	Сравнить A с B
+B9	CMP C	Сравнить A с C
+BA	CMP D	Сравнить A с D
+BB	CMP E	Сравнить A с E
+BC	CMP H	Сравнить A с H
+BD	CMP L	Сравнить A с L
+BE	CMP M	Сравнить A с Loc(HL)
+BF	CMP A	Установить флаг FZ

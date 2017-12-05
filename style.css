@@ -1,0 +1,173 @@
+/*
+https://github.com/Munawwar/flex-helper/blob/master/flex-helper.css
+*/
+
+/*Stack child items vertically*/
+.vbox {
+	display: flex;
+
+	/*Align children vetically*/
+	flex-direction: column;
+	align-content: flex-start;
+
+	overflow: hidden; /*Prevent extending beyond boundaries*/
+}
+/*Stack child items horizontally*/
+.hbox {
+	display: flex;
+
+	/*Align children horizontally*/
+	flex-direction: row;
+	align-content: flex-start;
+
+	/*Wrap items to next line on main-axis*/
+	flex-wrap: wrap;
+
+	overflow: hidden; /*Prevent extending beyond boundaries*/
+}
+/*Stretch item along parent's main-axis*/
+.flex {
+	flex: 1;
+}
+
+/*Stretch item along parent's cross-axis Overrides any cross-* class of parent*/
+.stretch-self {
+	align-self: stretch;
+}
+/*Center item along parent's cross-axis. Overrides any cross-* class of parent*/
+.center-self {
+	align-self: center;
+}
+
+/*Stack child items to the main-axis start*/
+.main-start {
+	justify-content: flex-start;
+}
+/*Stack child items to the cross-axis start*/
+.cross-start {
+	align-items: flex-start;
+	align-content: flex-start;
+}
+/*Stack child items to the main-axis center*/
+.main-center {
+	justify-content: center;
+}
+/*Stack child items to the cross-axis center*/
+.cross-center {
+	align-items: center;
+	align-content: center;
+}
+/*Stack child items to the main-axis end.*/
+.main-end {
+	justify-content: flex-end;
+}
+/*Stack child items to the cross-axis end.*/
+.cross-end {
+	align-items: flex-end;
+	align-content: flex-end;
+}
+/*Stretch child items along the cross-axis*/
+.cross-stretch {
+	align-items: stretch;
+	align-content: stretch;
+}
+
+/*Wrap items to next line on main-axis*/
+.wrap {
+	flex-wrap: wrap;
+}
+/*Don't wrap items to next line on main-axis*/
+.nowrap {
+	flex-wrap: nowrap;
+}
+
+
+body, html {
+	padding: 0;
+	margin: 0;
+	font-family: monospace;
+}
+
+.active {
+	background: #CCF;
+}
+
+.addr {
+	color: gray;
+}
+
+.op {
+	font-weight: bold;
+	padding: 0 1em;
+}
+
+.line:hover {
+	background: #CCC;
+}
+
+
+.left {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 35em;
+	height: 100vh;
+	border-right: 1px solid black;
+}
+
+.right {
+	padding: 1em;
+	margin-left: 35em;
+}
+
+.reg input {
+	border: 1px solid grey;
+	margin: .125em;
+	padding: .125em;
+	width: 2em;
+	box-sizing: border-box;
+}
+
+input.pc, input.sp {
+	width: 6em;
+}
+
+button {
+	border: 2px solid grey;
+	margin: .125em;
+	padding: 1em;
+}
+
+h1, h2, h3, h4, h5 {
+	text-align: center;
+}
+
+table, tr, td, tbody, textarea {
+	margin:0;padding:0;vertical-align:top;font:1em/1em monospace;
+}
+#t{padding:0 2px}
+#w{position:absolute;opacity:.001}
+
+#l, #t {
+	color: gray;
+}
+
+#l {
+	text-align: center;
+	width: 3em;
+}
+
+#r {
+}
+
+#hex {
+	border: none;
+	height:1.5em;
+	resize:none;
+	overflow:hidden;
+	color: black;
+}
+#hex-title {
+	text-align: center;
+	font-weight: bold;
+}

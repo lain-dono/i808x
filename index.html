@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset='utf-8'>
+<title>i808X proc emu</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id='app'>
+
+<div class='left'>
+	<h1>i808X proc emu</h1>
+
+	<div class='hbox' style='justify-content: space-around;'>
+		<div class='vbox'>
+			<button :disabled='runned' v-on:click="step(1)">Step</button>
+			<button :disabled='runned' v-on:click="run_cpu">Run</button>
+			<button :disabled='!runned' v-on:click="stop_cpu">Stop</button>
+		</div>
+		<div class='reg vbox'>
+			<div class='hbox'>
+				<label>A: <input readonly :value='hex8(cpu.a)'></label>
+				<label>F: <input readonly :value='hex8(cpu.f)'></label>
+			</div>
+			<div class='hbox'>
+				<label>B: <input readonly :value='hex8(cpu.b)'></label>
+				<label>C: <input readonly :value='hex8(cpu.c)'></label>
+			</div>
+			<div class='hbox'>
+				<label>D: <input readonly :value='hex8(cpu.d)'></label>
+				<label>E: <input readonly :value='hex8(cpu.e)'></label>
+			</div>
+			<div class='hbox'>
+				<label>H: <input readonly :value='hex8(cpu.h)'></label>
+				<label>L: <input readonly :value='hex8(cpu.l)'></label>
+			</div>
+			<div class='hbox'>
+				<label>PC: <input class='pc' readonly :value='hex16(cpu.pc)'></label>
+			</div>
+			<div class='hbox'>
+				<label>SP: <input class='sp' readonly :value='hex16(cpu.sp)'></label>
+			</div>
+		</div>
+
+		<div class='vbox'>
+			<label><input readonly onclick='return false;' type="checkbox" v-model='sign'> Sign</label>
+			<label><input readonly onclick='return false;' type="checkbox" v-model='zero'> Zero</label>
+			<label><input readonly onclick='return false;' type="checkbox" v-model='aux'> Aux Carry</label>
+			<label><input readonly onclick='return false;' type="checkbox" v-model='parity'> Parity</label>
+			<label><input readonly onclick='return false;' type="checkbox" v-model='carry'> Carry</label>
+
+			<p>Cycles: {{ cycles }}</p>
+		</div>
+
+
+
+	</div>
+
+	<br>
+	<br>
+	<h2>RAM</h2>
+
+	<table border=0>
+	<tr>
+		<td id='hex-title'></td>
+		<td id="t">
+			<span v-for='n in 0xF + 1'>
+				{{ hex8(n-1) }}
+			</span>
+		</td>
+	</tr>
+
+	<tr>
+		<td id=l>0000</td>
+		<td><textarea spellcheck=false id=hex cols=48></textarea>
+	</tr>
+	</table>
+
+
+
+</div>
+
+<div class='right'>
+	<div v-for='n in 0xFFF + 1' class='line' v-bind:class="{ active: n-1 === pc }">
+		<span class='addr'>{{ hex16(n - 1) }}</span> |
+		<span class='op'>{{ hex8(at(n - 1)) }}</span>
+		<span class='asm'>{{ asm(n - 1) }}</span>
+	</div>
+
+</div>
+
+</div>
+
+<script src='https://unpkg.com/vue'></script>
+<script src='cpu.js'></script>
+<script src='run.js'></script>
+
+<script src='js8080.js'>
+<script src='disasm.js'>
+// https://www.tramm.li/i8080/
+</script>
+
+<script src='main.js'></script>
+</body>
+</html>
