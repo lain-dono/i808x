@@ -49,6 +49,8 @@ function Cpu(memio, interrupt) {
   this.interrupt = interrupt;
 }
 
+window.Cpu = Cpu
+
 Cpu.prototype.af = function() {
   return this.a << 8 | this.f;
 };
@@ -322,6 +324,18 @@ Cpu.prototype.processInterrupts = function() {
 
 // returns false for HALT and illegal instr., else returns true
 Cpu.prototype.execute = function(i) {
+  let cmd = i
+  let result = this.run_command(cmd)
+  if (typeof result != 'undefined') {
+    return result
+  }
+
+  let _op = (cmd >> 6) & 3
+  if (_op == 1 || _op == 2) {
+    throw 'wtf?'
+  }
+
+
   switch(i) {
   case 0x00: // NOP
     this.cycles += 4;
@@ -602,903 +616,6 @@ Cpu.prototype.execute = function(i) {
 
 
 
-
-
-
-  case 0x40:
-    {
-      // LD   B,B
-      this.b = this.b;
-      this.cycles += 5;
-    }
-    break;
-  case 0x41:
-    {
-      //LD   B,C
-      this.b = this.c;
-      this.cycles += 5;
-    }
-    break;
-  case 0x42:
-    {
-      // LD   B,D
-      this.b = this.d;
-      this.cycles += 5;
-    }
-    break;
-  case 0x43:
-    {
-      // LD   B,E
-      this.b = this.e;
-      this.cycles += 5;
-    }
-    break;
-  case 0x44:
-    {
-      // LD   B,H
-      this.b = this.h;
-      this.cycles += 5;
-    }
-    break;
-  case 0x45:
-    {
-      // LD   B,L
-      this.b = this.l;
-      this.cycles += 5;
-    }
-    break;
-  case 0x46:
-    {
-      // LD   B,(HL)
-      this.b = this.memio.rd(this.hl());
-      this.cycles += 7;
-    }
-    break;
-  case 0x47:
-    {
-      // LD   B,A
-      this.b = this.a;
-      this.cycles += 5;
-    }
-    break;
-  case 0x48:
-    {
-      // LD   C,B
-      this.c = this.b;
-      this.cycles += 5;
-    }
-    break;
-  case 0x49:
-    {
-      // LD   C,C
-      this.c = this.c;
-      this.cycles += 5;
-    }
-    break;
-  case 0x4A:
-    {
-      // LD   C,D
-      this.c = this.d;
-      this.cycles += 5;
-    }
-    break;
-  case 0x4B:
-    {
-      // LD   C,E
-      this.c = this.e;
-      this.cycles += 5;
-    }
-    break;
-  case 0x4C:
-    {
-      // LD   C,H
-      this.c = this.h;
-      this.cycles += 5;
-    }
-    break;
-  case 0x4D:
-    {
-      // LD   C,L
-      this.c = this.l;
-      this.cycles += 5;
-    }
-    break;
-  case 0x4E:
-    {
-      // LD   C,(HL)
-      this.c = this.memio.rd(this.hl());
-      this.cycles += 7;
-    }
-    break;
-  case 0x4F:
-    {
-      // LD   C,A
-      this.c = this.a;
-      this.cycles += 5;
-    }
-    break;
-  case 0x50:
-    {
-      // LD   D,B
-      this.d = this.b;
-      this.cycles += 5;
-    }
-    break;
-  case 0x51:
-    {
-      // LD   D,C
-      this.d = this.c;
-      this.cycles += 5;
-    }
-    break;
-  case 0x52:
-    {
-      // LD   D,D
-      this.d = this.d;
-      this.cycles += 5;
-    }
-    break;
-  case 0x53:
-    {
-      // LD   D,E
-      this.d = this.e;
-      this.cycles += 5;
-    }
-    break;
-  case 0x54:
-    {
-      // LD   D,H
-      this.d = this.h;
-      this.cycles += 5;
-    }
-    break;
-  case 0x55:
-    {
-      // LD   D,L
-      this.d = this.l;
-      this.cycles += 5;
-    }
-    break;
-  case 0x56:
-    {
-      // LD   D,(HL)
-      this.d = this.memio.rd(this.hl());
-      this.cycles += 7;
-    }
-    break;
-  case 0x57:
-    {
-      // LD   D,A
-      this.d = this.a;
-      this.cycles += 5;
-    }
-    break;
-  case 0x58:
-    {
-      // LD   E,B
-      this.e = this.b;
-      this.cycles += 5;
-    }
-    break;
-  case 0x59:
-    {
-      // LD   E,C
-      this.e = this.c;
-      this.cycles += 5;
-    }
-    break;
-  case 0x5A:
-    {
-      // LD   E,D
-      this.e = this.d;
-      this.cycles += 5;
-    }
-    break;
-  case 0x5B:
-    {
-      // LD   E,E
-      this.e = this.e;
-      this.cycles += 5;
-    }
-    break;
-  case 0x5C:
-    {
-      // LD   E,H
-      this.e = this.h;
-      this.cycles += 5;
-    }
-    break;
-  case 0x5D:
-    {
-      // LD   E,L
-      this.e = this.l;
-      this.cycles += 5;
-    }
-    break;
-  case 0x5E:
-    {
-      // LD   E,(HL)
-      this.e = this.memio.rd(this.hl());
-      this.cycles += 7;
-    }
-    break;
-  case 0x5F:
-    {
-      // LD   E,A
-      this.e = this.a;
-      this.cycles += 5;
-    }
-    break;
-  case 0x60:
-    {
-      // LD   H,B
-      this.h = this.b;
-      this.cycles += 5;
-    }
-    break;
-  case 0x61:
-    {
-      // LD   H,C
-      this.h = this.c;
-      this.cycles += 5;
-    }
-    break;
-  case 0x62:
-    {
-      // LD   H,D
-      this.h = this.d;
-      this.cycles += 5;
-    }
-    break;
-  case 0x63:
-    {
-      // LD   H,E
-      this.h = this.e;
-      this.cycles += 5;
-    }
-    break;
-  case 0x64:
-    {
-      // LD   H,H
-      this.h = this.h;
-      this.cycles += 5;
-    }
-    break;
-  case 0x65:
-    {
-      // LD   H,L
-      this.h = this.l;
-      this.cycles += 5;
-    }
-    break;
-  case 0x66:
-    {
-      // LD   H,(HL)
-      this.h = this.memio.rd(this.hl());
-      this.cycles += 7;
-    }
-    break;
-  case 0x67:
-    {
-      // LD   H,A
-      this.h = this.a;
-      this.cycles += 5;
-    }
-    break;
-  case 0x68:
-    {
-      // LD   L,B
-      this.l = this.b;
-      this.cycles += 5;
-    }
-    break;
-  case 0x69:
-    {
-      // LD   L,C
-      this.l = this.c;
-      this.cycles += 5;
-    }
-    break;
-  case 0x6A:
-    {
-      // LD   L,D
-      this.l = this.d;
-      this.cycles += 5;
-    }
-    break;
-  case 0x6B:
-    {
-      // LD   L,E
-      this.l = this.e;
-      this.cycles += 5;
-    }
-    break;
-  case 0x6C:
-    {
-      // LD   L,H
-      this.l = this.h;
-      this.cycles += 5;
-    }
-    break;
-  case 0x6D:
-    {
-      // LD   L,L
-      this.l = this.l;
-      this.cycles += 5;
-    }
-    break;
-  case 0x6E:
-  {
-      // LD   L,(HL)
-      this.l = this.memio.rd(this.hl());
-      this.cycles += 7;
-  }
-  break;
-  case 0x6F:
-    {
-      // LD   L,A
-      this.l = this.a;
-      this.cycles += 5;
-    }
-    break;
-
-  case 0x70:
-    {
-      // LD   (HL),B
-      this.writeByte(this.hl(), this.b);
-      this.cycles += 7;
-    }
-    break;
-  case 0x71:
-    {
-      // LD   (HL),C
-      this.writeByte(this.hl(), this.c);
-      this.cycles += 7;
-    }
-    break;
-  case 0x72:
-    {
-      // LD   (HL),D
-      this.writeByte(this.hl(), this.d);
-      this.cycles += 7;
-    }
-    break;
-  case 0x73:
-    {
-      // LD   (HL),E
-      this.writeByte(this.hl(), this.e);
-      this.cycles += 7;
-    }
-    break;
-  case 0x74:
-    {
-      // LD   (HL),H
-      this.writeByte(this.hl(), this.h);
-      this.cycles += 7;
-    }
-    break;
-  case 0x75:
-    {
-      // LD   (HL),L
-      this.writeByte(this.hl(), this.l);
-      this.cycles += 7;
-    }
-    break;
-  case 0x76:
-    {
-      // HALT
-      this.cycles += 7;
-      return false; // stop emulation
-    }
-    break;
-  case 0x77:
-    {
-      // LD   (HL),A
-      this.writeByte(this.hl(), this.a);
-      this.cycles += 7;
-    }
-    break;
-  case 0x78:
-    {
-      // LD   A,B
-      this.a = this.b;
-      this.cycles += 5;
-    }
-    break;
-  case 0x79:
-    {
-      // LD   A,C
-      this.a = this.c;
-      this.cycles += 5;
-    }
-    break;
-  case 0x7A:
-    {
-      // LD   A,D
-      this.a = this.d;
-      this.cycles += 5;
-    }
-    break;
-  case 0x7B:
-    {
-      // LD   A,E
-      this.a = this.e;
-      this.cycles += 5;
-    }
-    break;
-  case 0x7C:
-    {
-      // LD   A,H
-      this.a = this.h;
-      this.cycles += 5;
-    }
-    break;
-  case 0x7D:
-    {
-      // LD   A,L
-      this.a = this.l;
-      this.cycles += 5;
-    }
-    break;
-  case 0x7E:
-    {
-      // LD   A,(HL)
-      this.a = this.memio.rd(this.hl());
-      this.cycles += 7;
-    }
-    break;
-  case 0x7F:
-    {
-      // LD   A,A
-      this.a = this.a;
-      this.cycles += 5;
-    }
-    break;
-
-
-
-
-
-
-  case 0x80: // ADD  A,B
-    this.a = this.addByte(this.a, this.b);
-    this.cycles += 4;
-    break;
-  case 0x81: // ADD  A,C
-    this.a = this.addByte(this.a, this.c);
-    this.cycles += 4;
-    break;
-  case 0x82: // ADD  A,D
-    this.a = this.addByte(this.a, this.d);
-    this.cycles += 4;
-    break;
-  case 0x83:
-    {
-      // ADD  A,E
-      this.a = this.addByte(this.a, this.e);
-      this.cycles += 4;
-    }
-    break;
-  case 0x84:
-    {
-      // ADD  A,H
-      this.a = this.addByte(this.a, this.h);
-      this.cycles += 4;
-    }
-    break;
-  case 0x85:
-    {
-      // ADD  A,L
-      this.a = this.addByte(this.a, this.l);
-      this.cycles += 4;
-    }
-    break;
-  case 0x86:
-    {
-      // ADD  A,(HL)
-      this.a = this.addByte(this.a, this.memio.rd(this.hl()));
-      this.cycles += 7;
-    }
-    break;
-  case 0x87:
-    {
-      // ADD  A,A
-      this.a = this.addByte(this.a, this.a);
-      this.cycles += 4;
-    }
-    break;
-  case 0x88:
-    {
-      // ADC  A,B
-      this.a = this.addByteWithCarry(this.a, this.b);
-      this.cycles += 4;
-    }
-    break;
-    case 0x89:
-      {
-      // ADC  A,C
-      this.a = this.addByteWithCarry(this.a, this.c);
-      this.cycles += 4;
-    }
-    break;
-  case 0x8A:
-    {
-      // ADC  A,D
-      this.a = this.addByteWithCarry(this.a, this.d);
-      this.cycles += 4;
-    }
-    break;
-    case 0x8B:
-      {
-      // ADC  A,E
-      this.a = this.addByteWithCarry(this.a, this.e);
-      this.cycles += 4;
-    }
-    break;
-  case 0x8C:
-    {
-      // ADC  A,H
-      this.a = this.addByteWithCarry(this.a, this.h);
-      this.cycles += 4;
-    }
-    break;
-  case 0x8D:
-    {
-      // ADC  A,L
-      this.a = this.addByteWithCarry(this.a, this.l);
-      this.cycles += 4;
-    }
-    break;
-  case 0x8E:
-    {
-      // ADC  A,(HL)
-      this.a = this.addByteWithCarry(this.a, this.memio.rd(this.hl()));
-      this.cycles += 7;
-    }
-    break;
-  case 0x8F:
-    {
-      // ADC  A,A
-      this.a = this.addByteWithCarry(this.a, this.a);
-      this.cycles += 4;
-    }
-    break;
-  case 0x90:
-    {
-      // SUB  B
-      this.a = this.subtractByte(this.a, this.b);
-      this.cycles += 4;
-    }
-    break;
-  case 0x91:
-    {
-      // SUB  C
-      this.a = this.subtractByte(this.a, this.c);
-      this.cycles += 4;
-    }
-    break;
-  case 0x92:
-    {
-      // SUB  D
-      this.a = this.subtractByte(this.a, this.d);
-      this.cycles += 4;
-    }
-    break;
-  case 0x93:
-    {
-      // SUB  E
-      this.a = this.subtractByte(this.a, this.e);
-      this.cycles += 4;
-    }
-    break;
-  case 0x94:
-    {
-      // SUB  H
-      this.a = this.subtractByte(this.a, this.h);
-      this.cycles += 4;
-    }
-    break;
-  case 0x95:
-    {
-      // SUB  L
-      this.a = this.subtractByte(this.a, this.l);
-      this.cycles += 4;
-    }
-    break;
-  case 0x96:
-    {
-      // SUB  (HL)
-      this.a = this.subtractByte(this.a, this.memio.rd(this.hl()));
-      this.cycles += 7;
-    }
-    break;
-  case 0x97:
-    {
-      // SUB  A
-      this.a = this.subtractByte(this.a, this.a);
-      this.cycles += 4;
-    }
-    break;
-  case 0x98:
-    {
-      // SBC  A,B
-      this.a = this.subtractByteWithCarry(this.a, this.b);
-      this.cycles += 4;
-    }
-    break;
-  case 0x99:
-    {
-      // SBC  A,C
-      this.a = this.subtractByteWithCarry(this.a, this.c);
-      this.cycles += 4;
-    }
-    break;
-  case 0x9A:
-    {
-      // SBC  A,D
-      this.a = this.subtractByteWithCarry(this.a, this.d);
-      this.cycles += 4;
-    }
-    break;
-  case 0x9B:
-    {
-      // SBC  A,E
-      this.a = this.subtractByteWithCarry(this.a, this.e);
-      this.cycles += 4;
-    }
-    break;
-  case 0x9C:
-    {
-      // SBC  A,H
-      this.a = this.subtractByteWithCarry(this.a, this.h);
-      this.cycles += 4;
-    }
-    break;
-  case 0x9D:
-    {
-      // SBC  A,L
-      this.a = this.subtractByteWithCarry(this.a, this.l);
-      this.cycles += 4;
-    }
-    break;
-  case 0x9E:
-    {
-      //  SBC  A,(HL)
-      this.a = this.subtractByteWithCarry(this.a, this.memio.rd(this.hl()));
-      this.cycles += 7;
-    }
-    break;
-  case 0x9F:
-    {
-      // SBC  A,A
-      this.a = this.subtractByteWithCarry(this.a, this.a);
-      this.cycles += 4;
-    }
-    break;
-  case 0xA0:
-    {
-      // AND  B
-      this.a = this.andByte(this.a, this.b);
-      this.cycles += 4;
-    }
-    break;
-  case 0xA1:
-    {
-      // AND  C
-      this.a = this.andByte(this.a, this.c);
-      this.cycles += 4;
-    }
-    break;
-  case 0xA2:
-    {
-      // AND  D
-      this.a = this.andByte(this.a, this.d);
-      this.cycles += 4;
-    }
-    break;
-  case 0xA3:
-    {
-      // AND  E
-      this.a = this.andByte(this.a, this.e);
-      this.cycles += 4;
-    }
-    break;
-  case 0xA4:
-    {
-      // AND  H
-      this.a = this.andByte(this.a, this.h);
-      this.cycles += 4;
-    }
-    break;
-  case 0xA5:
-    {
-      // AND  L
-      this.a = this.andByte(this.a, this.l);
-      this.cycles += 4;
-    }
-    break;
-  case 0xA6:
-    {
-      // AND  (HL)
-      this.a = this.andByte(this.a, this.memio.rd(this.hl()));
-      this.cycles += 7;
-    }
-    break;
-  case 0xA7:
-    {
-      // AND  A
-      this.a = this.andByte(this.a, this.a);
-      this.cycles += 4;
-    }
-    break;
-  case 0xA8:
-    {
-      // XOR  B
-      this.a = this.xorByte(this.a, this.b);
-      this.cycles += 4;
-    }
-    break;
-  case 0xA9:
-    {
-      // XOR  C
-      this.a = this.xorByte(this.a, this.c);
-      this.cycles += 4;
-    }
-    break;
-  case 0xAA:
-    {
-      // XOR  D
-      this.a = this.xorByte(this.a, this.d);
-      this.cycles += 4;
-    }
-    break;
-  case 0xAB:
-    {
-      // XOR  E
-      this.a = this.xorByte(this.a, this.e);
-      this.cycles += 4;
-    }
-    break;
-  case 0xAC:
-    {
-      // XOR  H
-      this.a = this.xorByte(this.a, this.h);
-      this.cycles += 4;
-    }
-    break;
-  case 0xAD:
-    {
-      // XOR  L
-      this.a = this.xorByte(this.a, this.l);
-      this.cycles += 4;
-    }
-    break;
-  case 0xAE:
-    {
-      // XOR  (HL)
-      this.a = this.xorByte(this.a, this.memio.rd(this.hl()));
-      this.cycles += 7;
-    }
-    break;
-  case 0xAF:
-    {
-      // XOR  A
-      this.a = this.xorByte(this.a, this.a);
-      this.cycles += 4;
-    }
-    break;
-  case 0xB0:
-    {
-      // OR  B
-      this.a = this.orByte(this.a, this.b);
-      this.cycles += 4;
-    }
-    break;
-  case 0xB1:
-    {
-      // OR  C
-      this.a = this.orByte(this.a, this.c);
-      this.cycles += 4;
-    }
-    break;
-  case 0xB2:
-    {
-      // OR  D
-      this.a = this.orByte(this.a, this.d);
-      this.cycles += 4;
-    }
-    break;
-  case 0xB3:
-    {
-      // OR  E
-      this.a = this.orByte(this.a, this.e);
-      this.cycles += 4;
-    }
-    break;
-  case 0xB4:
-    {
-      // OR  H
-      this.a = this.orByte(this.a, this.h);
-      this.cycles += 4;
-    }
-    break;
-  case 0xB5:
-    {
-      // OR  L
-      this.a = this.orByte(this.a, this.l);
-      this.cycles += 4;
-    }
-    break;
-  case 0xB6:
-    {
-      //  OR   (HL)
-      this.a = this.orByte(this.a, this.memio.rd(this.hl()));
-      this.cycles += 7;
-    }
-    break;
-  case 0xB7:
-    {
-      // OR  A
-      this.a = this.orByte(this.a, this.a);
-      this.cycles += 4;
-    }
-    break;
-  case 0xB8:
-    {
-      //  CP   B
-      this.subtractByte(this.a, this.b);
-      this.cycles += 4;
-    }
-    break;
-  case 0xB9:
-    {
-      //  CP   C
-      this.subtractByte(this.a, this.c);
-      this.cycles += 4;
-    }
-    break;
-  case 0xBA:
-    {
-      //  CP   D
-      this.subtractByte(this.a, this.d);
-      this.cycles += 4;
-    }
-    break;
-  case 0xBB:
-    {
-      //  CP   E
-      this.subtractByte(this.a, this.e);
-      this.cycles += 4;
-    }
-    break;
-  case 0xBC:
-    {
-      //  CP   H
-      this.subtractByte(this.a, this.h);
-      this.cycles += 4;
-    }
-    break;
-  case 0xBD:
-    {
-      //  CP   L
-      this.subtractByte(this.a, this.l);
-      this.cycles += 4;
-    }
-    break;
-  case 0xBE:
-    {
-      // CP   (HL)
-      this.subtractByte(this.a, this.memio.rd(this.hl()));
-      this.cycles += 7;
-    }
-    break;
-  case 0xBF:
-    {
-      //  CP   A
-      this.subtractByte(this.a, this.a);
-      this.cycles += 4;
-    }
-    break;
 
 
 
@@ -3918,3 +3035,145 @@ Cpu.prototype.disassemble = function(addr) {
 
 
 // vim: set shiftwidth=2 :
+//
+
+
+
+
+
+
+
+
+
+
+
+Cpu.prototype.run_command = function(cmd) {
+    let op = (cmd >> 6) & 3
+    switch (op) {
+    case 0:
+        break
+    case 1:
+        return this.LOAD(cmd)
+    case 2:
+        return this.ALU(cmd)
+    case 3:
+        break
+    }
+}
+
+
+Cpu.prototype.by_code = function(src) {
+    switch (src) {
+        case 0: return this.b // 000 B
+        case 1: return this.c // 001 C
+        case 2: return this.d // 010 D
+        case 3: return this.e // 011 E
+        case 4: return this.h // 100 H
+        case 5: return this.l // 101 L
+        case 6: return this.memio.rd(this.hl()) // 110 M
+        case 7: return this.a // 111 A
+        default: throw 'wtf?'
+    }
+}
+
+Cpu.prototype.set_by_code = function(dst, op) {
+    switch (dst) {
+    case 0: // 000 B
+        this.b = op
+        break
+    case 1: // 001 C
+        this.c = op
+        break
+    case 2: // 010 D
+        this.d = op
+        break
+    case 3: // 011 E
+        this.e = op
+        break
+    case 4: // 100 H
+        this.h = op
+        break
+    case 5: // 101 L
+        this.l = op
+        break
+    case 6: // 110 M
+        this.writeByte(this.hl(), op)
+        break
+    case 7: // 111 A
+        this.a = op
+        break
+    }
+}
+
+// 10xxxxxx
+Cpu.prototype.ALU = function(cmd) {
+    let knd = (cmd >> 3) & 7
+    let src = (cmd >> 0) & 7
+    this.cycles += 4
+
+    // for M
+    if (src === 6) this.cycles += 3
+
+    let op = this.by_code(src)
+    switch (knd) {
+    case 0: // ADD
+        this.a = this.addByte(this.a, op)
+        break
+    case 1: // ADC
+        this.a = this.addByteWithCarry(this.a, op)
+        break
+    case 2: // SUB
+        this.a = this.subtractByte(this.a, op)
+        break
+    case 3: // SBB
+        this.a = this.subtractByteWithCarry(this.a, op)
+        break
+    case 4: // ANA
+        this.a = this.andByte(this.a, op)
+        break
+    case 5: // XRA
+        this.a = this.xorByte(this.a, op)
+        break
+    case 6: // ORA
+        this.a = this.orByte(this.a, op)
+        break
+    case 7: // CMP
+        this.subtractByte(this.a, op);
+        break
+    }
+
+    return true
+}
+
+// 01xxxxxx
+Cpu.prototype.LOAD = function(cmd) {
+    let dst = (cmd >> 3) & 7
+    let src = (cmd >> 0) & 7
+    this.cycles += 5
+    // for M
+    if (src === 6 || dst === 6) this.cycles += 2
+    // HLT
+    if (src === 6 && dst === 6) return false
+    this.set_by_code(dst, this.by_code(src))
+    return true
+}
+
+    /*
+// 00xxxxxx
+Cpu.prototype.SINGLE = function(cmd) {
+    let dst = (cmd >> 3) & 7
+    let knd = (cmd >> 0) & 7
+
+    switch (knd) {
+    case 7:
+        // 4 - DAA
+        // 5 - CMA
+        // 6 - STC set carry
+        // 7 - CMC clear carry
+    case 4: // INR ++
+    case 5: // DCR --
+
+    break
+    }
+
+*/

@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset='utf-8'>
+<title>i808X instructions</title>
+<style>
+body, html {
+	font-family: monospace;
+}
+
+TABLE {
+	background: #111;
+}
+TD {
+	background: white;
+	color: black;
+}
+TH {
+	background: #666;
+	color: white;
+}
+
+td[title] {
+	/*
+	text-decoration-line: underline;
+	text-decoration-style: wavy;
+	text-decoration-color: blue;
+	*/
+}
+
+.cen {
+	text-align: center;
+}
+
+.u {
+	text-decoration: overline;
+}
+
+.one, .nb1 {
+	/*
+	background: #c00;
+	color: white;
+	*/
+}
+
+.two, .nb2 {
+	background: #0c0;
+	color: white;
+}
+
+.three, .nb3 {
+	background: #0cF;
+	color: white;
+}
+
+input {
+	border: 1px solid silver;
+}
+
+</style>
+</head>
+
+<body>
+
+<script src='code.js'></script>
+
+<script>
+document.write('<table border=0 cellpadding=4 cellspacing=1>')
+
+document.write('<tr>')
+document.write('<td></td>')
+
+for (let x = 0; x <= 0xF; x++) {
+	document.write(`<td>${x.toString(16)}</td>`)
+}
+document.write('</tr>')
+
+for (let y = 0; y <= 0xF; y++) {
+	document.write('<tr>')
+	document.write(`<td>${y.toString(16)}</td>`)
+	for (let x = 0; x <= 0xF; x++) {
+		let cmd = x | y << 4
+		let asm = asmval_by_code(cmd)
+		if (typeof asm === 'undefined') {
+			document.write('<th>-</th>')
+		} else {
+			//document.write(`<td class=nb${need_by_code(cmd)} title=${cmd.toString(16)}>${asm.split(' ')[0]}</td>`)
+			document.write(`<td class=nb${need_by_code(cmd)} title=${cmd.toString(16)}>${asm}</td>`)
+		}
+	}
+	document.write('</tr>')
+}
+
+document.write('</table>')
+document.write('<br>')
+document.write('<br>')
+document.write('<br>')
+
+	window.onload = function() {
+	let asmval = document.getElementById('asmval')
+	let hexcode = document.getElementById('hexcode')
+	hexcode.oninput = function() {
+		// fix it
+		hexcode.value = (parseInt(hexcode.value, 16) & 0xFF).toString(16)
+		let value = parseInt(hexcode.value, 16)
+		console.log(value)
+
+		asmval.textContent = asmval_by_code(value, 'first', 'second')
+	}
+	}
+
+
+
+</script>
+
+
+<div>
+<input id='hexcode' value=0 />
+</div>
+
+<p id='asmval'>
+</p>
+
+
+<br>
+<br>
+<br>
+<br>
+
+
+
+
+<table border=0 cellpadding=4 cellspacing=1 style='text-align: center'>
+
+</tr><tr>
+	<td>reg</td>
+	<td>B</td>
+	<td>C</td>
+	<td>D</td>
+	<td>E</td>
+	<td>H</td>
+	<td>L</td>
+	<td>M</td>
+	<td>A</td>
+	<td>B</td>
+	<td>C</td>
+	<td>D</td>
+	<td>E</td>
+	<td>H</td>
+	<td>L</td>
+	<td>M</td>
+	<td>A</td>
+
+
+<tr><th>HIGH</th><th colspan=16>LOW</th></tr>
+
+<tr>
+	<td></td>
+	<td>0</td>
+	<td>1</td>
+	<td>2</td>
+	<td>3</td>
+	<td>4</td>
+	<td>5</td>
+	<td>6</td>
+	<td>7</td>
+	<td>8</td>
+	<td>9</td>
+	<td>A</td>
+	<td>B</td>
+	<td>C</td>
+	<td>D</td>
+	<td>E</td>
+	<td>F</td>
+
+	<th title='LXI INX DCX DAD'>RP</th>
+
+
+</tr><tr><td>0</td>
+	<td class=one title='00'>NOP</td>
+
+	<td class=three rowspan=4 title='01 11 21 31'>LXI</td>
+
+	<td class=one rowspan=2 title='02 12'>STAX</td>
+
+	<td class=one rowspan=4 title='03 13 23 33'>INX</td>
+	<td class=one rowspan=4 title='04 14 24 34'>INR</td>
+	<td class=one rowspan=4 title='05 15 25 35'>DCR</td>
+
+	<td class=two rowspan=4 title='06 16 26 36'>MVI</td>
+
+	<td title='07' class='one'>RCL</td>
+
+	<th rowspan=4 title='08 18 28 38'>-</th>
+
+	<td class=one rowspan=4 title='09 19 29 39'>DAD</td>
+
+	<td class=one rowspan=2 title='0a 1a'>LDAX</td>
+
+
+	<td class=one rowspan=4 title='0b 1b 2b 3b'>DCX</td>
+	<td class=one rowspan=4 title='0c 1c 2c 3c'>INR</td>
+	<td class=one rowspan=4 title='0d 1d 2d 3d'>DCR</td>
+	<td class=two rowspan=4 title='0e 1e 2e 3e'>MVI</td>
+
+	<td title='0f' class='one'>RCR</td>
+
+	<th title='_00_'>BC</th>
+
+
+
+</tr><tr><td>1</td>
+	<th title='10'>-</th>
+	<td title='17' class='one'>RAL</td>
+	<td title='1F' class='one'>RAR</td>
+
+	<th title='_01_'>DE</th>
+
+</tr><tr><td>2</td>
+	<th title='only 8085'>RIM</th>
+
+	<td title='22' class=three>SHLD</td>
+	<td title='27' class='one'>DDA</td>
+	<td title='2a' class=three>LHLD</td>
+	<td title='2f' class='one'>CMA</td>
+
+	<th title='_10_'>HL</th>
+
+</tr><tr><td>3</td>
+	<th title='only 8085'>SIM</th>
+	<td title='32' class=three>STA</td>
+	<td title='37' class=one>STC</td>
+	<td title='3a' class=three>LDA</td>
+	<td title='3f' class=one>CMC</td>
+
+	<th title='_11_'>SP</th>
+
+
+
+</tr><tr><td></td>
+
+</tr><tr><td>4</td>
+	<td class='one' colspan=16 rowspan=3>MOV</td>
+
+</tr><tr><td>5</td>
+</tr><tr><td>6</td>
+</tr><tr><td>7</td>
+	<td class='one' colspan=6>MOV</td>
+	<td class='one' colspan=1 title='76'>HLT</td>
+	<td class='one' colspan=9>MOV</td>
+
+</tr><tr><td></td>
+
+
+</tr><tr><td>8</td>
+	<td colspan=8>ADD</td>
+	<td colspan=8>ADC</td>
+</tr><tr><td>9</td>
+	<td colspan=8>SUB</td>
+	<td colspan=8>SBB</td>
+</tr><tr><td>A</td>
+	<td colspan=8>ANA</td>
+	<td colspan=8>XNA</td>
+</tr><tr><td>B</td>
+	<td colspan=8>ORA</td>
+	<td colspan=8>CMP</td>
+
+
+
+</tr><tr><td></td>
+
+</tr><tr><td>C</td>
+	<td title='c0' class=one>RNZ</td>
+	<td class=one rowspan=4 title='c1 d1 e1 f1'>POP</td>
+
+	<td title='c2' class=three>JNZ</td>
+	<td title='c3' class=three>JMP</td>
+	<td title='c4' class=three>CNZ</td>
+
+	<td class=one rowspan=4 title='c5 d5 e5 f5'>PUSH</td>
+
+
+	<td title='c6' class=two>ADI</td>
+
+	<td class=one rowspan=4 title='c7 d7 e7 f7'>RST</td>
+
+	<td title='c8' class=one>RZ</td>
+
+	<td title='c9' class=one>RET</td>
+	<td title='ca' class=three>JZ</td>
+	<th title='cb'>-</th>
+	<td title='cc' class=three>CZ</td>
+	<td title='cd' class=three>CALL</td>
+	<td title='ce' class=two>ACI</td>
+
+	<td class=one rowspan=4 title='cf df ef ff'>RST</td>
+
+</tr><tr><td>D</td>
+	<td title='d0' class=one>RNC</td>
+	<td title='d2' class=three>JNC</td>
+	<td title='d3' class=two>OUT</td>
+	<td title='d4' class=three>CNC</td>
+	<td title='d6' class=two>SUI</td>
+
+	<td title='d8' class=one>RC</td>
+	<th title='d9'>-</th>
+
+	<td title='da' class=three>JC</td>
+	<td title='db' class=two>IN</td>
+	<td title='dc' class=three>CC</td>
+
+	<th rowspan=3 title='DD, ED, FD'>-</th>
+	<td title='de' class=two>SBI</td>
+
+</tr><tr><td>E</td>
+	<td title='e0' class=one>RPO</td>
+	<td title='e2' class=three>JPO</td>
+	<td title='e3' class=one>XTHL</td>
+	<td title='e4' class=three>CPO</td>
+	<td title='e6' class=two>ANI</td>
+
+	<td title='e8' class=one>RPE</td>
+	<td title='e9' class=one>PCHL</td>
+	<td title='ea' class=three>JPE</td>
+	<td title='eb' class=one>XCHG</td>
+	<td title='ec' class=three>CPE</td>
+	<td title='ee' class=two>XRI</td>
+
+</tr><tr><td>F</td>
+	<td title='f0' class=one>RP</td>
+
+	<td title='f2' class=three>JP</td>
+	<td title='f3' class=one>DI</td>
+	<td title='f4' class=three>CP</td>
+	<td title='f6' class=two>ORI</td>
+
+	<td title='f8' class=one>RM</td>
+	<td title='f9' class=one>SPHL</td>
+
+	<td title='fa' class=three>JM</td>
+	<td title='fb' class=one>EI</td>
+	<td title='fc' class=three>CM</td>
+
+	<td title='fe' class=two>CPI</td>
+</tr>
+
+</table>
+
+
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+
+
+
+
+
+<table border=0 cellpadding=4 cellspacing=1>
+
+<!--
+<tr>
+	<th>CODE</th>
+	<th colspan=2>DESCRIPTION</th>
+</tr>
+-->
+
+
+<tr>
+	<td>0011_111</td>
+	<th colspan=6 class=cen>CARRY BIT INSTRUCTIONS</th>
+</tr><tr>
+	<td>____0___</td>
+	<td>STC</th>
+	<td rowspan=2></td>
+	<td>(Carry) &#8592; 1</td>
+	<td>Set Carry</td>
+</tr><tr>
+	<td>____1___</td>
+	<td>CMC</td>
+	<td>(Carry) &#8592; (<span class='u'>Carry</span>)</td>
+	<td>Complement Carry</td>
+</tr>
+
+<tr>
+	<td>00___1__</td>
+	<th colspan=6 class=cen>SINGLE REGISTER INSTRUCTIONS</th>
+</tr>
+<tr>
+	<td>00___100</td>
+	<td>INR</td>
+	<td rowspan=2>REGM</td>
+	<td>(REGM) &#8592; (REGM) + 1</td>
+	<td>Increment register REGM</td>
+</tr><tr>
+	<td>00___101</td>
+	<td>DCR</td>
+	<td>(REGM) &#8592; (REGM) - 1</td>
+	<td>Decrement register REGM</td>
+</tr><tr>
+	<td>00101111</td>
+	<td>CMA</td>
+	<td rowspan=2></td>
+	<td>(A) &#8592; (<span class='u'>A</span>)</td><td>Complement accumulator</td>
+</tr><tr>
+	<td>00100111</td>
+	<td>DAA</td><td> </td><td> </td>
+</tr>
+
+
+
+<tr>
+	<td>________</td>
+	<th colspan=6 class=cen>NOP INSTRUCTION</th>
+</tr>
+
+<tr>
+	<td>00000000</td>
+	<td>NOP</td>
+	<td></td>
+	<td></td>
+	<td></td>
+</tr>
+
+
+
+<tr>
+	<td>0_______</td>
+	<th colspan=6 class=cen>DATA TRANSFER INSTRUCTIONS</th>
+</tr>
+<tr>
+	<td>01DDDSSS</td>
+	<td>MOV</td>
+	<td>DST, SRC</td>
+	<td> </td>
+	<td> </td>
+</tr><tr>
+	<td>000_0101</td>
+	<td>STAX</td>
+	<td rowspan=2>RP</td>
+	<td> </td>
+	<td> </td>
+</tr><tr>
+	<td>000_1101</td>
+	<td>LDAX</td>
+	<td> </td>
+	<td> </td>
+</tr>
+
+<tr>
+	<td>10___SSS</td>
+	<th colspan=6 class=cen>REGISTER OR MEMORY TO ACCUMULATOR INSTRUCTIONS</th>
+</tr>
+<tr>
+	<td>__000___</td>
+	<td>ADD</td>
+	<td rowspan=8>REGM</td>
+	<td> </td><td> </td>
+</tr><tr>
+	<td>__001___</td>
+	<td>ADC</td>
+	<td> </td><td> </td>
+</tr><tr>
+	<td>__010___</td>
+	<td>SUB</td>
+	<td> </td><td> </td>
+</tr><tr>
+	<td>__011___</td>
+	<td>SBB</td>
+	<td> </td><td> </td>
+</tr><tr>
+	<td>__100___</td>
+	<td>ANA</td>
+	<td> </td><td> </td>
+</tr><tr>
+	<td>__101___</td>
+	<td>XRA</td>
+	<td> </td><td> </td>
+</tr><tr>
+	<td>__110___</td>
+	<td>ORA</td>
+	<td> </td><td> </td>
+</tr><tr>
+	<td>__111___</td>
+	<td>CMP</td>
+	<td> </td><td> </td>
+</tr>
+
+
+
+<tr>
+	<td>000__111</td>
+	<th colspan=6 class=cen>ROTATE ACCUMULATOR INSTRUCTIONS</th>
+</tr>
+<tr>
+	<td>___00___</td>
+	<td>RLC</td>
+	<td rowspan=4></td>
+	<td> </td><td> </td>
+</tr><tr>
+	<td>___01___</td>
+	<td>RRC</td>
+	<td> </td><td> </td>
+</tr><tr>
+	<td>___10___</td>
+	<td>RAL</td>
+	<td> </td><td> </td>
+</tr><tr>
+	<td>___11___</td>
+	<td>RAR</td>
+	<td> </td><td> </td>
+</tr>
+
+
+
+<tr>
+	<td>________</td>
+	<th colspan=6 class=cen>REGISTER PAlR INSTRUCTIONS</th>
+</tr>
+
+<tr>
+	<td>11__0101</td>
+	<td>PUSH</td>
+	<td rowspan=5>RP</td>
+	<td> </td><td> </td>
+</tr><tr>
+	<td>11__0001</td>
+	<td>POP</td>
+	<td> </td><td> </td>
+</tr><tr>
+	<td>00__1001</td>
+	<td>DAD</td><td> </td><td> </td>
+</tr><tr>
+	<td>00__0011</td>
+	<td>INX</td><td> </td><td> </td>
+</tr><tr>
+	<td>00__1011</td>
+	<td>DCX</td><td> </td><td> </td>
+
+</tr><tr>
+	<td>11101011</td>
+	<td>XCHG</td>
+	<td rowspan=3></td>
+	<td> </td><td> </td>
+</tr><tr>
+	<td>11100011</td>
+	<td>XTHL</td><td> </td><td> </td>
+</tr><tr>
+	<td>11111001</td>
+	<td>SPHL</td><td> </td><td> </td>
+</tr>
+
+
+<tr>
+	<td>________</td>
+	<th colspan=6 class=cen>IMMEDIATE INSTRUCTIONS</th>
+</tr>
+<tr>
+	<td>00__0001</td>
+	<td>LXI</td>
+	<td>RP, DATA16</td>
+	<td> </td><td> </td>
+</tr>
+<tr>
+	<td>00___110</td>
+	<td>MVI</td>
+	<td>REGM, DATA</td>
+	<td> </td><td> </td>
+</tr>
+
+<tr>
+	<td rowspan=1>11___110</td>
+	<td colspan=6></td>
+</tr>
+
+<tr>
+	<td>__000___</td>
+	<td>ADI</td>
+	<td rowspan=8>REGM</td>
+	<td> </td><td> </td>
+
+</tr><tr>
+	<td>__001___</td>
+	<td>ACI</td>
+	<td> </td><td> </td>
+</tr><tr>
+	<td>__010___</td>
+	<td>SUI</td>
+	<td> </td><td> </td>
+</tr><tr>
+	<td>__011___</td>
+	<td>SBI</td>
+	<td> </td><td> </td>
+</tr><tr>
+	<td>__100___</td>
+	<td>ANI</td>
+	<td> </td><td> </td>
+</tr><tr>
+	<td>__101___</td>
+	<td>XRI</td>
+	<td> </td><td> </td>
+</tr><tr>
+	<td>__110___</td>
+	<td>ORI</td>
+	<td> </td><td> </td>
+</tr><tr>
+	<td>__111___</td>
+	<td>CPI</td>
+	<td> </td><td> </td>
+</tr>
+
+
+
+</table>
+<table border=0 cellpadding=4 cellspacing=1>
+
+
+
+<tr><th colspan=3 class=cen>
+DIRECT ADDRESSING INSTRUCTIONS
+</th></tr>
+<tr><td>STA</td><td> </td><td> </td><td rowspan=4>[LABEL:] CODE ADDR</td></tr>
+<tr><td>LDA</td><td> </td><td> </td></tr>
+<tr><td>SHLD</td><td> </td><td> </td></tr>
+<tr><td>LHLD</td><td> </td><td> </td></tr>
+
+<tr><th colspan=3 class=cen>
+JUMP INSTRUCTIONS
+</th></tr>
+<tr><td>PCHL</td><td> </td><td> </td><td rowspan=1>[LABEL:] PCHL</td></tr>
+<tr><td>JMP</td><td> </td><td> </td><td rowspan=9>[LABEL:] CODE ADDR</td></tr>
+<tr><td>JC</td><td> </td><td> </td></tr>
+<tr><td>JNC</td><td> </td><td> </td></tr>
+<tr><td>JZ</td><td> </td><td> </td></tr>
+<tr><td>JNZ</td><td> </td><td> </td></tr>
+<tr><td>JP</td><td> </td><td> </td></tr>
+<tr><td>JM</td><td> </td><td> </td></tr>
+<tr><td>JPE</td><td> </td><td> </td></tr>
+<tr><td>JPO</td><td> </td><td> </td></tr>
+
+<tr><th colspan=3 class=cen>
+CALL INSTRUCTIONS
+</th></tr>
+<tr><td>CALL</td><td> </td><td> </td><td rowspan=8>[LABEL:] CODE ADDR</td></tr>
+<tr><td>CC</td><td> </td><td> </td></tr>
+<tr><td>CNC</td><td> </td><td> </td></tr>
+<tr><td>CZ</td><td> </td><td> </td></tr>
+<tr><td>CP</td><td> </td><td> </td></tr>
+<tr><td>CM</td><td> </td><td> </td></tr>
+<tr><td>CPE</td><td> </td><td> </td></tr>
+<tr><td>CPO</td><td> </td><td> </td></tr>
+
+<tr><th colspan=3 class=cen>
+RETURN INSTRUCTIONS
+</th></tr>
+<tr><td>RET</td><td> </td><td> </td><td rowspan=9>[LABEL:] CODE</td></tr>
+<tr><td>RC</td><td> </td><td> </td></tr>
+<tr><td>RNC</td><td> </td><td> </td></tr>
+<tr><td>RZ</td><td> </td><td> </td></tr>
+<tr><td>RNZ</td><td> </td><td> </td></tr>
+<tr><td>RM</td><td> </td><td> </td></tr>
+<tr><td>RP</td><td> </td><td> </td></tr>
+<tr><td>RPE</td><td> </td><td> </td></tr>
+<tr><td>RPO</td><td> </td><td> </td></tr>
+
+<tr><th colspan=3 class=cen>
+RST INSTRUCTION
+</th></tr>
+<tr><td>RST</td><td> </td><td> </td><td rowspan=1>[LABEL:] RST EXP</td></tr>
+
+<tr><th colspan=3 class=cen>
+INTERRUPT FLIP-FLOP INSTRUCTIONS
+</th></tr>
+<tr><td>EI</td><td> </td><td> </td><td rowspan=2>[LABEL:] CODE</td></tr>
+<tr><td>DI</td><td> </td><td> </td></tr>
+
+<tr><th colspan=3 class=cen>
+INPUT/OUTPUT INSTRUCTIONS
+</th></tr>
+<tr><td>IN</td><td> </td><td> </td><td rowspan=2>[LABEL:] CODE EXP</td></tr>
+<tr><td>OUT</td><td> </td><td> </td></tr>
+
+<tr><th colspan=3 class=cen>
+HLT INSTRUCTION
+</th></tr>
+<tr><td>HLT</td><td> </td><td> </td><td rowspan=1>[LABEL:] HALT</td></tr>
+
+</table>
+
+
+
+</body>
+</html>

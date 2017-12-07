@@ -75,7 +75,8 @@ var app = new Vue({
     },
     methods: {
         at(addr) { return cpu.ram[addr] },
-        asm(addr) { return cpu.disassembleInstruction(addr)[1] },
+        //asm(addr) { return cpu.disassembleInstruction(addr)[1] },
+        asm(addr) { return asmval_by_code(memio.ram[addr]) },
         hex8(i) { return dec2hex(i, 2) },
         hex16(i) { return dec2hex(i, 4) },
 
