@@ -120,7 +120,7 @@ body, html {
 	margin-left: 35em;
 }
 
-.reg input {
+input {
 	border: 1px solid grey;
 	margin: .125em;
 	padding: .125em;
@@ -142,9 +142,37 @@ h1, h2, h3, h4, h5 {
 	text-align: center;
 }
 
+
 table, tr, td, tbody, textarea {
-	margin:0;padding:0;vertical-align:top;font:1em/1em monospace;
+	margin:0;
+	padding:0;
+	vertical-align: top;
+	font:1em/1em monospace;
 }
+
+TABLE.xtable {
+	background: #111;
+	position: fixed;
+	bottom: 0;
+	right: 0;
+}
+
+.xtable TD,
+.xtable TH
+{
+	padding: .25em;
+	vertical-align: middle;
+	text-align: center;
+}
+.xtable TD {
+	background: white;
+	color: black;
+}
+.xtable TH {
+	background: #666;
+	color: white;
+}
+
 #t{padding:0 2px}
 #w{position:absolute;opacity:.001}
 
@@ -171,3 +199,23 @@ table, tr, td, tbody, textarea {
 	text-align: center;
 	font-weight: bold;
 }
+
+
+
+td.one, .nb1 {
+	/*
+	background: #c00;
+	color: white;
+	*/
+}
+
+td.two, .nb2 {
+	background: #0c0;
+	color: white;
+}
+
+td.three, .nb3 {
+	background: #0cF;
+	color: white;
+}
+

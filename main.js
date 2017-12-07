@@ -46,6 +46,7 @@ function dec2hex(i, n) {
     return pad(i.toString(16).toUpperCase(), n)
 }
 
+    /*
 document.body.onkeydown = function(e) {
     switch (e.keyCode) {
     case 32:
@@ -54,6 +55,7 @@ document.body.onkeydown = function(e) {
     break
     }
 }
+*/
 
 var app = new Vue({
     el: '#app',
@@ -63,20 +65,71 @@ var app = new Vue({
         aux: 0,
         parity: 0,
         carry: 0,
+        interrupt: 0,
 
         pc: 0,
         cycles: 0,
 
         runned: false,
         interval: 0,
+
+        xcode: 0,
+    },
+    filters: {
     },
     computed: {
         cpu() { return cpu },
+        code: {
+            get() {
+                return this.xcode.toString(16)
+            },
+            set(v) {
+                this.xcode = parseInt(v, 16) & 0xFF
+            },
+        }
     },
     methods: {
+        commands() {
+            let N = 0x3F
+            let pc = cpu.pc
+            return Array.apply(null, {length: N})
+                .map(Number.call, Number)
+                .map((v) => {
+                    let addr = (v + pc - 0xF)
+                    while (addr < 0) {
+                        addr += 0xFFFF
+                    }
+                    return addr & 0xFFFF
+                })
+
+
+            //let s = (cpu.pc - 0xF) & 0xFFFF
+            //let e = (cpu.pc + 0xF) & 0xFFFF
+            //return cpu.ram.slice(cpu.pc - 0xF, cpu.pc + 0xF)
+            //return cpu.ram.slice(s, e)
+            //return cpu.ram.slice(0, 0xFF)
+            /*.map((n) => {
+                return {
+                    is_active: n-1 === cpu.pc,
+                    addr: hex16(n - 1),
+                    op: hex8(cpu.ram[n - 1]),
+                    asm: this.asm(n - 1),
+                }
+            })*/
+        },
+
+
         at(addr) { return cpu.ram[addr] },
+
+        at_n(addr) {
+            return 'nb' + need_by_code(cpu.ram[addr])
+        },
+
         //asm(addr) { return cpu.disassembleInstruction(addr)[1] },
         asm(addr) { return asmval_by_code(memio.ram[addr]) },
+
+        asm_8(v) { return asmval_by_code(v) },
+
         hex8(i) { return dec2hex(i, 2) },
         hex16(i) { return dec2hex(i, 4) },
 
@@ -93,6 +146,7 @@ var app = new Vue({
             this.aux = cpu.f & HALFCARRY
             this.parity = cpu.f & PARITY
             this.carry = cpu.f & CARRY
+            this.interrupt = cpu.f & INTERRUPT
 
             this.pc = cpu.pc
             this.cycles = cpu.cycles
@@ -116,7 +170,7 @@ var app = new Vue({
                     }
                 //}
                 self.upd()
-            }, 100)
+            }, 16)
         },
     }
 })
