@@ -1,6 +1,6 @@
 'use strict'
 
-console.log('start main')
+const VMEM = 0xA000
 
 function randInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min
@@ -20,22 +20,31 @@ SimpleMemio.prototype.wr = function(a, b) {
     return b
 }
 
+console.log('start main')
+
+let asm_code = document.getElementById('asm-code')
+var myCodeMirror = CodeMirror.fromTextArea(asm_code, {
+    mode: null,
+    lineNumbers: true,
+    tabSize: 16,
+    indentUnit: 16,
+    smartIndent: true,
+    readOnly: false,
+})
+
 let memio = new SimpleMemio()
-
-memio.ram[0] = 0x3E
-memio.ram[1] = 0xDE
-
-memio.ram[2] = 0x04
-memio.ram[3] = 0x0C
-memio.ram[4] = 0x14
-memio.ram[5] = 0x1C
-memio.ram[6] = 0x24
-memio.ram[7] = 0x2C
-
-memio.ram[10] = 0xC3
-memio.ram[11] = 0x00
-
+let asm = new Assembler()
 let cpu = new Cpu(memio)
+
+reassemble()
+
+function reassemble() {
+    asm.assemble(myCodeMirror.getValue())
+    asm.mem.length = 0xFFFF
+    memio.ram = Uint8Array.from(asm.mem)
+    cpu.ram = memio.ram
+    cpu.reset()
+}
 
 function pad(n, width, z) {
     z = z || '0';
@@ -88,9 +97,43 @@ var app = new Vue({
             },
         }
     },
+    mounted() {
+        let canvas = document.getElementById('canvas')
+        let video = new Screen(canvas, 160, 144)
+        window.video = video
+        this.update_screen()
+        video.render()
+    },
     methods: {
+        update_screen() {
+            let vid = window.video
+            for (let y = 0; y < 144; y++) {
+                let line = y * 0x40
+                for (let x = 0; x < 160; x++) {
+                    let addr = (line + x / 4) | 0
+                    let byte = memio.ram[VMEM + addr]
+                    let color
+                    switch (x % 4) {
+                        case 0: color = (byte >> 6) & 3; break;
+                        case 1: color = (byte >> 4) & 3; break;
+                        case 2: color = (byte >> 2) & 3; break;
+                        case 3: color = (byte >> 0) & 3; break;
+                    }
+                    switch (color) {
+                    case 0: color = 0xFFFFFF; break;
+                    case 1: color = 0x999999; break;
+                    case 2: color = 0xCC0000; break;
+                    case 3: color = 0x000000; break;
+                    }
+                    vid.setPixel(x, y, color)
+                }
+            }
+            window.video.render()
+        },
+
+
         commands() {
-            let N = 0x3F
+            let N = 0x10F
             let pc = cpu.pc
             return Array.apply(null, {length: N})
                 .map(Number.call, Number)
@@ -101,21 +144,6 @@ var app = new Vue({
                     }
                     return addr & 0xFFFF
                 })
-
-
-            //let s = (cpu.pc - 0xF) & 0xFFFF
-            //let e = (cpu.pc + 0xF) & 0xFFFF
-            //return cpu.ram.slice(cpu.pc - 0xF, cpu.pc + 0xF)
-            //return cpu.ram.slice(s, e)
-            //return cpu.ram.slice(0, 0xFF)
-            /*.map((n) => {
-                return {
-                    is_active: n-1 === cpu.pc,
-                    addr: hex16(n - 1),
-                    op: hex8(cpu.ram[n - 1]),
-                    asm: this.asm(n - 1),
-                }
-            })*/
         },
 
 
@@ -126,7 +154,16 @@ var app = new Vue({
         },
 
         //asm(addr) { return cpu.disassembleInstruction(addr)[1] },
-        asm(addr) { return asmval_by_code(memio.ram[addr]) },
+        asm(addr) {
+            return asmval_by_code(memio.ram[addr], addr, (pc) => memio.ram[pc & 0xFFFF])
+        },
+
+        reassemble() {
+            reassemble()
+            this.upd()
+            this.$forceUpdate()
+        },
+
 
         asm_8(v) { return asmval_by_code(v) },
 
@@ -150,6 +187,8 @@ var app = new Vue({
 
             this.pc = cpu.pc
             this.cycles = cpu.cycles
+
+            this.update_screen()
         },
 
         stop_cpu() {
@@ -174,76 +213,3 @@ var app = new Vue({
         },
     }
 })
-
-var hexed
-document.body.onload = function() {
-    hexed = document.getElementById('hex')
-    hexed.value = ''
-    for (let i=0; i <= 0xFF; i++) {
-        hexed.value += dec2hex(cpu.ram[i], 2) + ' '
-    }
-    hexed.style.height = (1.5+hexed.value.length/47)+'em';
-    hexed.oninput = hex_editor
-}
-
-function hex_editor(self) {
-    // On input, store the length of clean hex before the textarea caret in b
-    let b = this.value
-        .substr(0, this.selectionStart)
-        .replace(/[^0-9A-F]/ig,"")
-        .replace(/(..)/g,"$1 ")
-        .length;
-
-    // Clean the textarea value
-    this.value = this.value
-        .replace(/[^0-9A-F]/ig, '')
-        .replace(/(..)/g, '$1 ')
-        .replace(/ $/, '')
-        .toUpperCase();
-
-    // Set the height of the textarea according to its length
-    this.style.height = (1.5+this.value.length/47)+'em';
-
-    // Reset h
-    this.h="";
-
-    // Loop on textarea lines
-    for (let i=0;i<this.value.length/48;i++) {
-        // Add line number to h
-        this.h += (1E7+(16*i).toString(16)).slice(-4)+" "
-    }
-
-    // Write h on the left column
-    l.innerHTML = this.h;
-
-    // Reset h
-    this.h = '';
-    // Loop on the hex values
-    for(let i=0; i<this.value.length; i+=3) {
-        // Convert them in numbers
-        let c=parseInt(this.value.substr(i,2),16)
-
-        // Convert in chars (if the charCode is in [64-126] (maybe more later)) or ".".
-        this.h = 63 < c && 127>c ?
-            this.h + String.fromCharCode(c):
-            this.h + "."
-    }
-
-    // Write h in the right column (with line breaks every 16 chars)
-    //r.innerHTML=h.replace(/(.{16})/g,"$1 ");
-    // If the caret position is after a space or a line break, place it at the previous index so we can use backspace to erase hex code
-    if (this.value[b]==" ")
-        b--;
-
-    if (this.value.length > 0xFF * 3 + 2) {
-        this.value = this.value.substring(0, 0xFF * 3 + 2)
-    }
-
-    this.value.split(' ')
-        .forEach((v, i) => cpu.ram[i] = parseInt(v, 16))
-
-    app.$forceUpdate()
-
-    // Put the textarea caret at the right place
-    this.setSelectionRange(b, b)
-}

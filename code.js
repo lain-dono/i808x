@@ -58,11 +58,21 @@ function need_by_code(cmd) {
 	return 1
 }
 
-function asmval_by_code(cmd, first, second) {
+function asmval_by_code(cmd, pc, get_addr) {
 	let kind = cmd >> 6
 	let dst = (cmd >> 3) & 7
 	let rp_sp = (cmd >> 4) & 3
 	let src = (cmd >> 0) & 7
+
+	let next8 = 'd8'
+	let next16 = 'd16'
+	let addr = 'a16'
+	if (typeof pc !== 'undefined') {
+		let a = get_addr(pc + 1) || 0
+		let b = get_addr(pc + 2) || 0
+		next8 = dec2hex(a, 2) + 'h'
+		next16 = addr = dec2hex(a | b << 8, 4) + 'h'
+	}
 
 	switch (cmd) {
 	case 0x00: return 'NOP'
@@ -89,24 +99,24 @@ function asmval_by_code(cmd, first, second) {
 	case 0x02:
 	case 0x12:
 		return `STAX ${rp_sp_text(rp_sp)}`
-	case 0x22: return `SHLD a16`
-	case 0x32: return `STA a16`
+	case 0x22: return 'SHLD ' + addr
+	case 0x32: return 'STA ' + addr
 
 	case 0x0A:
 	case 0x1A:
 		return `LDAX ${rp_sp_text(rp_sp)}`
-	case 0x2A: return `LHLD a16`
-	case 0x3A: return `LDA a16`
+	case 0x2A: return 'LHLD ' + addr
+	case 0x3A: return 'LDA ' + addr
 
-	case 0x07: return `RCL`
-	case 0x17: return `RAL`
-	case 0x27: return `DDA`
-	case 0x37: return `STC`
+	case 0x07: return 'RCL'
+	case 0x17: return 'RAL'
+	case 0x27: return 'DDA'
+	case 0x37: return 'STC'
 
-	case 0x0F: return `RCR`
-	case 0x1F: return `RAR`
-	case 0x2F: return `CMA`
-	case 0x3F: return `CMC`
+	case 0x0F: return 'RCR'
+	case 0x1F: return 'RAR'
+	case 0x2F: return 'CMA'
+	case 0x3F: return 'CMC'
 
 	case 0xc1:
 	case 0xd1:
@@ -120,36 +130,36 @@ function asmval_by_code(cmd, first, second) {
 	case 0xf5:
 		return `PUSH ${rp_psw_text(rp_sp)}`
 
-	case 0xc0: return 'RNZ a16'
-	case 0xd0: return 'RNC a16'
-	case 0xe0: return 'RPO a16'
-	case 0xf0: return 'RP a16'
-	case 0xc8: return 'RZ a16'
-	case 0xd8: return 'RC a16'
-	case 0xe8: return 'RPE a16'
-	case 0xf8: return 'RM a16'
+	case 0xc0: return 'RNZ ' + addr
+	case 0xd0: return 'RNC ' + addr
+	case 0xe0: return 'RPO ' + addr
+	case 0xf0: return 'RP ' + addr
+	case 0xc8: return 'RZ ' + addr
+	case 0xd8: return 'RC ' + addr
+	case 0xe8: return 'RPE ' + addr
+	case 0xf8: return 'RM ' + addr
 
-	case 0xc2: return 'JNZ a16'
-	case 0xd2: return 'JNC a16'
-	case 0xe2: return 'JPO a16'
-	case 0xf2: return 'JP a16'
-	case 0xca: return 'JZ a16'
-	case 0xda: return 'JC a16'
-	case 0xea: return 'JPE a16'
-	case 0xfa: return 'JM a16'
+	case 0xc2: return 'JNZ ' + addr
+	case 0xd2: return 'JNC ' + addr
+	case 0xe2: return 'JPO ' + addr
+	case 0xf2: return 'JP ' + addr
+	case 0xca: return 'JZ ' + addr
+	case 0xda: return 'JC ' + addr
+	case 0xea: return 'JPE ' + addr
+	case 0xfa: return 'JM ' + addr
 
-	case 0xc4: return 'CNZ a16'
-	case 0xd4: return 'CNC a16'
-	case 0xe4: return 'CPO a16'
-	case 0xf4: return 'CP a16'
-	case 0xcc: return 'CZ a16'
-	case 0xdc: return 'CC a16'
-	case 0xec: return 'CPE a16'
-	case 0xfc: return 'CM a16'
+	case 0xc4: return 'CNZ ' + addr
+	case 0xd4: return 'CNC ' + addr
+	case 0xe4: return 'CPO ' + addr
+	case 0xf4: return 'CP ' + addr
+	case 0xcc: return 'CZ ' + addr
+	case 0xdc: return 'CC ' + addr
+	case 0xec: return 'CPE ' + addr
+	case 0xfc: return 'CM ' + addr
 
 
-	case 0xc3: return 'JMP a16'
-	case 0xd3: return 'OUT port'
+	case 0xc3: return 'JMP ' + addr
+	case 0xd3: return 'OUT ' + next8
 	case 0xe3: return 'XTHL'
 	case 0xf3: return 'DI'
 
@@ -157,11 +167,11 @@ function asmval_by_code(cmd, first, second) {
 	case 0xe9: return 'PCHL'
 	case 0xf9: return 'SPHL'
 
-	case 0xdb: return 'IN port'
+	case 0xdb: return 'IN ' + next8
 	case 0xeb: return 'XCHG'
 	case 0xfb: return 'EI'
 
-	case 0xcd: return 'CALL a16'
+	case 0xcd: return 'CALL ' + addr
 
 	}
 
@@ -172,7 +182,7 @@ function asmval_by_code(cmd, first, second) {
 			if (dst & 1) {
 				return `DAD ${rp_sp_text(rp_sp)}`
 			} else {
-				return `LXI ${rp_sp_text(rp_sp)}, d16`
+				return `LXI ${rp_sp_text(rp_sp)}, ` + next16
 			}
 		}
 
@@ -189,7 +199,7 @@ function asmval_by_code(cmd, first, second) {
 		case 5:
 			return `DCR ${regm_text(dst)}`
 		case 6:
-			return `MVI ${regm_text(dst)}, d8`
+			return `MVI ${regm_text(dst)}, ` + next8
 		}
 		break
 	case 1:
@@ -204,7 +214,7 @@ function asmval_by_code(cmd, first, second) {
 
 		case 0x6:
 		case 0xe:
-			return `${imm_text(dst)} d8`
+			return `${imm_text(dst)} ` + next8
 		}
 	}
 }
