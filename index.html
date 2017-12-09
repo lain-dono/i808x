@@ -10,55 +10,6 @@
 </head>
 <body class='hbox'>
 
-<div id='asm-code-wrapper'>
-	<textarea id='asm-code'>
-@main:
-	mvi b, 5h
-	call @loop
-	jmp 0
-
-org 000Fh
-@loop:
-	dcr b
-	jnz $-1
-	ret
-
-
-; 忍
-	org 0A200h
-	db 0, 0, 48, 0
-	ds 60
-	db 0, 3, 255, 255
-	ds 60
-	db 0, 0, 48, 0
-	ds 60
-	ds 64
-	db 0, 0, 40, 160
-	ds 60
-	db 0, 0, 170, 168
-	ds 60
-	db 0, 0, 170, 168
-	ds 60
-	db 0, 0, 42, 160
-	ds 60
-	db 0, 0, 10, 128
-	ds 60
-	db 0, 0, 2, 0
-
-
-org 0A000h	; first video line start
-	db 255
-org 0A027h	; first video line end
-	db 255
-org 0C3C0h	; last video line start
-	db 255
-org 0C3e7h	; last video line end
-	db 255
-
-
-</textarea>
-</div>
-
 <div id='app' class='hbox full'>
 
 <div class='right full scroll'>
@@ -427,6 +378,328 @@ org 0C3e7h	; last video line end
 
 
 
+<div id='asm-code-wrapper'>
+	<textarea id='asm-code'>
+	jmp @main
+@main:
+	lxi h, 0A800h
+	lxi b, say
+	call @say
+
+	mvi a, 0FFh
+	lxi h, 0A600h
+	call @vline
+
+	jmp @main
+
+say:
+db 'Prepare Uranus', 0
+
+
+@say:
+	push b
+	push d
+	push h
+	push psw
+say_loop:
+	ldax b ; in char in a
+	inx b
+	adi 0b
+	jz say_end
+	;sui 32 ; char from 32
+
+	lxi d, font
+say_incr_d:
+	inx d
+	inx d
+	inx d
+	inx d
+	inx d
+	inx d
+	inx d
+	inx d
+	dcr a
+	jnz say_incr_d
+
+	call @blit03
+
+	inx h ; next pos
+	inx h
+	jmp say_loop
+
+say_end:
+	pop psw
+	pop h
+	pop d
+	pop b
+	ret
+
+@vline:	; break a and hl
+	push b
+
+	mvi b, 27h
+	dcr b
+	mov m, a
+	inx h
+	jnz $-3
+
+	pop b
+	ret
+
+@blit03: ; gets DC and HL
+	push b
+	push d
+	push h
+	push pcw
+	mvi b, 8h
+blit03loop:
+	ldax d
+	call @blit03b
+	inx d
+	mov a, l
+	adi 40h
+	jnc blit03no
+	inr h
+blit03no:
+	mov l, a
+	dcr b
+	jnz blit03loop
+
+	pop pcw
+	pop h
+	pop d
+	pop b
+	ret
+
+
+@blit03b:
+	push b
+	push d
+	push h
+	push pcw
+
+	mov b, a
+
+	ani 11110000b
+	rrc
+	rrc
+	rrc
+	rrc
+	mov c, a ;now in c 0000xxxx
+
+	lxi d, clr03
+	mov a, e
+	add c
+	mov e, a
+	ldax d ; now actual color
+	mov m, a	; draw 1 half bit
+
+	inx h ; next
+
+	mov a, b
+	ani 1111b
+	mov c, a ;now in c 0000xxxx
+
+	lxi d, clr03
+	mov a, e
+	add c
+	mov e, a
+	ldax d ; now actual color
+	mov m, a	; draw 0 half bit
+	inx h ; next
+
+	push pcw
+	pop h
+	pop d
+	pop b
+	ret
+
+clr03: ; black on white color table
+	db 00000000b
+	db 00000011b
+	db 00001100b
+	db 00001111b
+	db 00110000b
+	db 00110011b
+	db 00111100b
+	db 00111111b
+	db 11000000b
+	db 11000011b
+	db 11001100b
+	db 11001111b
+	db 11110000b
+	db 11110011b
+	db 11111100b
+	db 11111111b
+
+org 9000h
+font:
+    db 000h, 000h, 000h, 000h, 000h, 000h, 000h, 000h
+    db 000h, 03Eh, 041h, 055h, 041h, 055h, 049h, 03Eh
+    db 000h, 03Eh, 07Fh, 06Bh, 07Fh, 06Bh, 077h, 03Eh
+    db 000h, 022h, 077h, 07Fh, 07Fh, 03Eh, 01Ch, 008h
+    db 000h, 008h, 01Ch, 03Eh, 07Fh, 03Eh, 01Ch, 008h
+    db 000h, 008h, 01Ch, 02Ah, 07Fh, 02Ah, 008h, 01Ch
+    db 000h, 008h, 01Ch, 03Eh, 07Fh, 03Eh, 008h, 01Ch
+    db 000h, 000h, 01Ch, 03Eh, 03Eh, 03Eh, 01Ch, 000h
+    db 0FFh, 0FFh, 0E3h, 0C1h, 0C1h, 0C1h, 0E3h, 0FFh
+    db 000h, 000h, 01Ch, 022h, 022h, 022h, 01Ch, 000h
+    db 0FFh, 0FFh, 0E3h, 0DDh, 0DDh, 0DDh, 0E3h, 0FFh
+    db 000h, 00Fh, 003h, 005h, 039h, 048h, 048h, 030h
+    db 000h, 008h, 03Eh, 008h, 01Ch, 022h, 022h, 01Ch
+    db 000h, 018h, 014h, 010h, 010h, 030h, 070h, 060h
+    db 000h, 00Fh, 019h, 011h, 013h, 037h, 076h, 060h
+    db 000h, 008h, 02Ah, 01Ch, 077h, 01Ch, 02Ah, 008h
+    db 000h, 060h, 078h, 07Eh, 07Fh, 07Eh, 078h, 060h
+    db 000h, 003h, 00Fh, 03Fh, 07Fh, 03Fh, 00Fh, 003h
+    db 000h, 008h, 01Ch, 02Ah, 008h, 02Ah, 01Ch, 008h
+    db 000h, 066h, 066h, 066h, 066h, 000h, 066h, 066h
+    db 000h, 03Fh, 065h, 065h, 03Dh, 005h, 005h, 005h
+    db 000h, 00Ch, 032h, 048h, 024h, 012h, 04Ch, 030h
+    db 000h, 000h, 000h, 000h, 000h, 07Fh, 07Fh, 07Fh
+    db 000h, 008h, 01Ch, 02Ah, 008h, 02Ah, 01Ch, 03Eh
+    db 000h, 008h, 01Ch, 03Eh, 07Fh, 01Ch, 01Ch, 01Ch
+    db 000h, 01Ch, 01Ch, 01Ch, 07Fh, 03Eh, 01Ch, 008h
+    db 000h, 008h, 00Ch, 07Eh, 07Fh, 07Eh, 00Ch, 008h
+    db 000h, 008h, 018h, 03Fh, 07Fh, 03Fh, 018h, 008h
+    db 000h, 000h, 000h, 070h, 070h, 070h, 07Fh, 07Fh
+    db 000h, 000h, 014h, 022h, 07Fh, 022h, 014h, 000h
+    db 000h, 008h, 01Ch, 01Ch, 03Eh, 03Eh, 07Fh, 07Fh
+    db 000h, 07Fh, 07Fh, 03Eh, 03Eh, 01Ch, 01Ch, 008h
+    db 000h, 000h, 000h, 000h, 000h, 000h, 000h, 000h
+    db 000h, 018h, 03Ch, 03Ch, 018h, 018h, 000h, 018h
+    db 000h, 036h, 036h, 014h, 000h, 000h, 000h, 000h
+    db 000h, 036h, 036h, 07Fh, 036h, 07Fh, 036h, 036h
+    db 000h, 008h, 01Eh, 020h, 01Ch, 002h, 03Ch, 008h
+    db 000h, 060h, 066h, 00Ch, 018h, 030h, 066h, 006h
+    db 000h, 03Ch, 066h, 03Ch, 028h, 065h, 066h, 03Fh
+    db 000h, 018h, 018h, 018h, 030h, 000h, 000h, 000h
+    db 000h, 060h, 030h, 018h, 018h, 018h, 030h, 060h
+    db 000h, 006h, 00Ch, 018h, 018h, 018h, 00Ch, 006h
+    db 000h, 000h, 036h, 01Ch, 07Fh, 01Ch, 036h, 000h
+    db 000h, 000h, 008h, 008h, 03Eh, 008h, 008h, 000h
+    db 000h, 000h, 000h, 000h, 030h, 030h, 030h, 060h
+    db 000h, 000h, 000h, 000h, 03Ch, 000h, 000h, 000h
+    db 000h, 000h, 000h, 000h, 000h, 000h, 060h, 060h
+    db 000h, 000h, 006h, 00Ch, 018h, 030h, 060h, 000h
+    db 000h, 03Ch, 066h, 06Eh, 076h, 066h, 066h, 03Ch
+    db 000h, 018h, 018h, 038h, 018h, 018h, 018h, 07Eh
+    db 000h, 03Ch, 066h, 006h, 00Ch, 030h, 060h, 07Eh
+    db 000h, 03Ch, 066h, 006h, 01Ch, 006h, 066h, 03Ch
+    db 000h, 00Ch, 01Ch, 02Ch, 04Ch, 07Eh, 00Ch, 00Ch
+    db 000h, 07Eh, 060h, 07Ch, 006h, 006h, 066h, 03Ch
+    db 000h, 03Ch, 066h, 060h, 07Ch, 066h, 066h, 03Ch
+    db 000h, 07Eh, 066h, 00Ch, 00Ch, 018h, 018h, 018h
+    db 000h, 03Ch, 066h, 066h, 03Ch, 066h, 066h, 03Ch
+    db 000h, 03Ch, 066h, 066h, 03Eh, 006h, 066h, 03Ch
+    db 000h, 000h, 018h, 018h, 000h, 018h, 018h, 000h
+    db 000h, 000h, 018h, 018h, 000h, 018h, 018h, 030h
+    db 000h, 006h, 00Ch, 018h, 030h, 018h, 00Ch, 006h
+    db 000h, 000h, 000h, 03Ch, 000h, 03Ch, 000h, 000h
+    db 000h, 060h, 030h, 018h, 00Ch, 018h, 030h, 060h
+    db 000h, 03Ch, 066h, 006h, 01Ch, 018h, 000h, 018h
+    db 000h, 038h, 044h, 05Ch, 058h, 042h, 03Ch, 000h
+    db 000h, 03Ch, 066h, 066h, 07Eh, 066h, 066h, 066h
+    db 000h, 07Ch, 066h, 066h, 07Ch, 066h, 066h, 07Ch
+    db 000h, 03Ch, 066h, 060h, 060h, 060h, 066h, 03Ch
+    db 000h, 07Ch, 066h, 066h, 066h, 066h, 066h, 07Ch
+    db 000h, 07Eh, 060h, 060h, 07Ch, 060h, 060h, 07Eh
+    db 000h, 07Eh, 060h, 060h, 07Ch, 060h, 060h, 060h
+    db 000h, 03Ch, 066h, 060h, 060h, 06Eh, 066h, 03Ch
+    db 000h, 066h, 066h, 066h, 07Eh, 066h, 066h, 066h
+    db 000h, 03Ch, 018h, 018h, 018h, 018h, 018h, 03Ch
+    db 000h, 01Eh, 00Ch, 00Ch, 00Ch, 06Ch, 06Ch, 038h
+    db 000h, 066h, 06Ch, 078h, 070h, 078h, 06Ch, 066h
+    db 000h, 060h, 060h, 060h, 060h, 060h, 060h, 07Eh
+    db 000h, 063h, 077h, 07Fh, 06Bh, 063h, 063h, 063h
+    db 000h, 063h, 073h, 07Bh, 06Fh, 067h, 063h, 063h
+    db 000h, 03Ch, 066h, 066h, 066h, 066h, 066h, 03Ch
+    db 000h, 07Ch, 066h, 066h, 066h, 07Ch, 060h, 060h
+    db 000h, 03Ch, 066h, 066h, 066h, 06Eh, 03Ch, 006h
+    db 000h, 07Ch, 066h, 066h, 07Ch, 078h, 06Ch, 066h
+    db 000h, 03Ch, 066h, 060h, 03Ch, 006h, 066h, 03Ch
+    db 000h, 07Eh, 05Ah, 018h, 018h, 018h, 018h, 018h
+    db 000h, 066h, 066h, 066h, 066h, 066h, 066h, 03Eh
+    db 000h, 066h, 066h, 066h, 066h, 066h, 03Ch, 018h
+    db 000h, 063h, 063h, 063h, 06Bh, 07Fh, 077h, 063h
+    db 000h, 063h, 063h, 036h, 01Ch, 036h, 063h, 063h
+    db 000h, 066h, 066h, 066h, 03Ch, 018h, 018h, 018h
+    db 000h, 07Eh, 006h, 00Ch, 018h, 030h, 060h, 07Eh
+    db 000h, 01Eh, 018h, 018h, 018h, 018h, 018h, 01Eh
+    db 000h, 000h, 060h, 030h, 018h, 00Ch, 006h, 000h
+    db 000h, 078h, 018h, 018h, 018h, 018h, 018h, 078h
+    db 000h, 008h, 014h, 022h, 041h, 000h, 000h, 000h
+    db 000h, 000h, 000h, 000h, 000h, 000h, 000h, 07Fh
+    db 000h, 00Ch, 00Ch, 006h, 000h, 000h, 000h, 000h
+    db 000h, 000h, 000h, 03Ch, 006h, 03Eh, 066h, 03Eh
+    db 000h, 060h, 060h, 060h, 07Ch, 066h, 066h, 07Ch
+    db 000h, 000h, 000h, 03Ch, 066h, 060h, 066h, 03Ch
+    db 000h, 006h, 006h, 006h, 03Eh, 066h, 066h, 03Eh
+    db 000h, 000h, 000h, 03Ch, 066h, 07Eh, 060h, 03Ch
+    db 000h, 01Ch, 036h, 030h, 030h, 07Ch, 030h, 030h
+    db 000h, 000h, 03Eh, 066h, 066h, 03Eh, 006h, 03Ch
+    db 000h, 060h, 060h, 060h, 07Ch, 066h, 066h, 066h
+    db 000h, 000h, 018h, 000h, 018h, 018h, 018h, 03Ch
+    db 000h, 00Ch, 000h, 00Ch, 00Ch, 06Ch, 06Ch, 038h
+    db 000h, 060h, 060h, 066h, 06Ch, 078h, 06Ch, 066h
+    db 000h, 018h, 018h, 018h, 018h, 018h, 018h, 018h
+    db 000h, 000h, 000h, 063h, 077h, 07Fh, 06Bh, 06Bh
+    db 000h, 000h, 000h, 07Ch, 07Eh, 066h, 066h, 066h
+    db 000h, 000h, 000h, 03Ch, 066h, 066h, 066h, 03Ch
+    db 000h, 000h, 07Ch, 066h, 066h, 07Ch, 060h, 060h
+    db 000h, 000h, 03Ch, 06Ch, 06Ch, 03Ch, 00Dh, 00Fh
+    db 000h, 000h, 000h, 07Ch, 066h, 066h, 060h, 060h
+    db 000h, 000h, 000h, 03Eh, 040h, 03Ch, 002h, 07Ch
+    db 000h, 000h, 018h, 018h, 07Eh, 018h, 018h, 018h
+    db 000h, 000h, 000h, 066h, 066h, 066h, 066h, 03Eh
+    db 000h, 000h, 000h, 000h, 066h, 066h, 03Ch, 018h
+    db 000h, 000h, 000h, 063h, 06Bh, 06Bh, 06Bh, 03Eh
+    db 000h, 000h, 000h, 066h, 03Ch, 018h, 03Ch, 066h
+    db 000h, 000h, 000h, 066h, 066h, 03Eh, 006h, 03Ch
+    db 000h, 000h, 000h, 03Ch, 00Ch, 018h, 030h, 03Ch
+    db 000h, 00Eh, 018h, 018h, 030h, 018h, 018h, 00Eh
+    db 000h, 018h, 018h, 018h, 000h, 018h, 018h, 018h
+    db 000h, 070h, 018h, 018h, 00Ch, 018h, 018h, 070h
+    db 000h, 000h, 000h, 03Ah, 06Ch, 000h, 000h, 000h
+    db 000h, 008h, 01Ch, 036h, 063h, 041h, 041h, 07Fh
+
+; 忍
+	org 0A200h
+	db 0, 0, 48, 0
+	ds 60
+	db 0, 3, 255, 255
+	ds 60
+	db 0, 0, 48, 0
+	ds 60
+	ds 64
+	db 0, 0, 40, 160
+	ds 60
+	db 0, 0, 170, 168
+	ds 60
+	db 0, 0, 170, 168
+	ds 60
+	db 0, 0, 42, 160
+	ds 60
+	db 0, 0, 10, 128
+	ds 60
+	db 0, 0, 2, 0
+
+
+org 0A000h	; first video line start
+	db 255
+org 0A027h	; first video line end
+	db 255
+org 0C3C0h	; last video line start
+	db 255
+org 0C3e7h	; last video line end
+	db 255
+
+
+</textarea>
+</div>
+
+
+
 <script src='screen.js'></script>
 <script src='rasm.js'></script>
 
@@ -435,6 +708,7 @@ org 0C3e7h	; last video line end
 -->
 
 <script src='https://unpkg.com/codemirror'></script>
+<script src='https://codemirror.net/addon/mode/simple.js'></script>
 <script src='https://unpkg.com/vue/dist/vue.min.js'></script>
 <script src='cpu.js'></script>
 <script src='run.js'></script>

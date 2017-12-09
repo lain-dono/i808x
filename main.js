@@ -22,15 +22,33 @@ SimpleMemio.prototype.wr = function(a, b) {
 
 console.log('start main')
 
+
+CodeMirror.defineSimpleMode('asm', {
+    start: [
+
+        {regex: /[^;]+:/, token: 'atom'},
+        {regex: /;.*/, token: 'comment'},
+
+        {regex: /([0-9abcdefABCDEF]+h)|([0-1]+b)|([0-9]+d?)/, token: 'number'},
+
+    ],
+    meta: {
+        dontIndentState: ['comment'],
+        lineComment: ';',
+    },
+})
+
 let asm_code = document.getElementById('asm-code')
 var myCodeMirror = CodeMirror.fromTextArea(asm_code, {
-    mode: null,
+    mode: 'asm',
     lineNumbers: true,
     tabSize: 16,
     indentUnit: 16,
     smartIndent: true,
     readOnly: false,
+    indentWithTabs: true,
 })
+
 
 let memio = new SimpleMemio()
 let asm = new Assembler()
@@ -202,13 +220,14 @@ var app = new Vue({
             var self = this
             this.runned = true
             this.interval = setInterval(function () {
-                //let i = randInt(200, 250)
-                //while (i--) {
+                let i = randInt(200, 250)
+                while (i--) {
                     if (self.runned) {
                         self.runned = cpu.step()
                     }
-                //}
-                self.upd()
+                }
+                //self.upd()
+                self.update_screen()
             }, 16)
         },
     }

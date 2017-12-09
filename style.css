@@ -10,7 +10,8 @@ https://github.com/Munawwar/flex-helper/blob/master/flex-helper.css
 	flex-direction: column;
 	align-content: flex-start;
 
-	overflow: hidden; /*Prevent extending beyond boundaries*/
+	/*Prevent extending beyond boundaries*/
+	/*overflow: hidden;*/
 }
 /*Stack child items horizontally*/
 .hbox {
@@ -23,7 +24,8 @@ https://github.com/Munawwar/flex-helper/blob/master/flex-helper.css
 	/*Wrap items to next line on main-axis*/
 	flex-wrap: wrap;
 
-	overflow: hidden; /*Prevent extending beyond boundaries*/
+	/*Prevent extending beyond boundaries*/
+	/*overflow: hidden;*/
 }
 /*Stretch item along parent's main-axis*/
 .flex {
@@ -95,8 +97,8 @@ body, html {
 .line {
 	display: flex;
 	align-items: stretch;
-	line-height: 1.5em;
-	height: 1.5em;
+	line-height: 1.25em;
+	height: 1.25em;
 	padding: 0 1em;
 	box-sizing: border-box;
 }
@@ -291,4 +293,5 @@ td.three, .nb3 {
 	width: 160px;
 	height: 144px;
 	box-sizing: content-box;
+	outline: 1px solid #FF851B;
 }
