@@ -4,8 +4,8 @@
 <meta charset='utf-8'>
 <title>i808X emulator</title>
 <link rel="stylesheet" href="colors.css">
-<link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="https://unpkg.com/codemirror/lib/codemirror.css">
+<link rel="stylesheet" href="style.css">
 
 </head>
 <body class='hbox'>
@@ -42,7 +42,7 @@
 				<span class='rv'>{{ hex8(cpu.h) }}{{ hex8(cpu.l) }}</span>
 			</div>
 			<div class='hbox' title='Program Status Word (Accumulator & Flags)'>
-				<span class='rt bg-blue'>PCW</span>  <span class='rv'>{{ hex8(cpu.a) }}{{ hex8(cpu.f) }}</span>
+				<span class='rt bg-blue'>PSW</span>  <span class='rv'>{{ hex8(cpu.a) }}{{ hex8(cpu.f) }}</span>
 			</div>
 			<div class='hbox' title='Program Counter'>
 				<div class='rt bg-red'>PC</div> <div class='rv'>{{ hex16(cpu.pc) }}</div>
@@ -94,31 +94,31 @@
 			<div class='vbox flex'>
 				<div class=hbox>
 					<div class=flex></div>
-					<button class=flex></button>
+					<button class=flex title='0' @mousedown='down(0)' @mouseup='up(0)'></button>
 					<div class=flex></div>
 				</div>
 				<div class=hbox>
-					<button class=flex></button>
+					<button class=flex title='1' @mousedown='down(1)' @mouseup='up(1)'></button>
 					<div class=flex></div>
-					<button class=flex></button>
+					<button class=flex title='2' @mousedown='down(2)' @mouseup='up(2)'></button>
 				</div>
 				<div class=hbox>
 					<div class='flex'></div>
-					<button class='flex'></button>
+					<button class='flex' title='3' @mousedown='down(3)' @mouseup='up(3)'></button>
 					<div class='flex'></div>
 				</div>
 			</div>
 
 
 			<div class='vbox flex'>
-				<button>A</button>
-				<button>B</button>
+				<button title=4 @mousedown='down(4)' @mouseup='up(4)'>A</button>
+				<button title=5 @mousedown='down(5)' @mouseup='up(5)'>B</button>
 			</div>
 		</div>
 
 		<div class=hbox>
-			<button class='flex'>select</button>
-			<button class='flex'>start</button>
+			<button title=6 class='flex' @mousedown='down(6)' @mouseup='up(6)'>select</button>
+			<button title=7 class='flex' @mousedown='down(7)' @mouseup='up(7)'>start</button>
 		</div>
 	</div>
 
@@ -380,48 +380,103 @@
 
 <div id='asm-code-wrapper'>
 	<textarea id='asm-code'>
+	lxi b, 02400h
+	lxi h, 0A000h
+	call @memzero
 	jmp @main
 @main:
-	lxi h, 0A800h
-	lxi b, say
+
+	in 0 ; read keyboard
+	mov b, a
+	ani 10000000b
+	jz x_main
+
+	lxi h, 0A805h
+	lxi d, say_text
+	mvi c, 01010101b
 	call @say
 
 	mvi a, 0FFh
-	lxi h, 0A600h
+	lxi h, 0AB00h
 	call @vline
+
+x_main:
+	lxi b, 300h
+	lxi d, 0A200h
+	lxi h, 0B200h
+	call @memcpy
+
+	lxi b, 300h
+	lxi d, shinobu
+	lxi h, 0B500h
+	call @memcpy
 
 	jmp @main
 
-say:
-db 'Prepare Uranus', 0
+say_text: db 'Prepare Uranus!', 0
 
+; memcpy --
+; Copy a block of memory from one location to another.
+;
+; Entry registers
+;       BC - Number of bytes to copy
+;       DE - Address of source data block
+;       HL - Address of target data block
+;
+; Return registers
+;       BC - Zero
 
-@say:
+@memcpy:
+	mov     a,b         ;Test BC,
+	ora     c           ;If BC = 0,
+	rz                  ;Return
+memcpy_loop:	ldax    d           ;Load A from (DE)
+	mov     m,a         ;Store A into (HL)
+	inx     d           ;Increment DE
+	inx     h           ;Increment HL
+	dcx     b           ;Decrement BC (does not affect Flags)
+	mov     a,b         ;Test for done
+	ora     c           ;B | C = 0 and done
+	jnz     memcpy_loop ;Repeat loop until BC = 0
+	ret
+
+; memzero --
+; Clear block of memory.
+;
+; Entry registers
+;       BC - Number of bytes to copy
+;       HL - Address of target data block
+;
+; Return registers
+;       BC - Zero
+
+@memzero:
+	mov     a,b         ;Test BC,
+	ora     c           ;If BC = 0,
+	rz                  ;Return
+memzero_loop:
+	mvi     m, 0        ;Fill with 0
+	inx     h           ;Increment HL
+	dcx     b           ;Decrement BC (does not affect Flags)
+	mov     a,b         ;Test for done
+	ora     c           ;B | C = 0 and done
+	jnz     memzero_loop ;Repeat loop until BC = 0
+	ret
+
+@say: ; in HL - screen, in DE - string
 	push b
 	push d
 	push h
 	push psw
 say_loop:
-	ldax b ; in char in a
-	inx b
-	adi 0b
+	ldax d ; in char in a
+	inx d
+	ora a ; check if zero
 	jz say_end
-	;sui 32 ; char from 32
 
-	lxi d, font
-say_incr_d:
-	inx d
-	inx d
-	inx d
-	inx d
-	inx d
-	inx d
-	inx d
-	inx d
-	dcr a
-	jnz say_incr_d
-
-	call @blit03
+	push b
+	call @blit_char
+	pop b
 
 	inx h ; next pos
 	inx h
@@ -446,23 +501,40 @@ say_end:
 	pop b
 	ret
 
-@blit03: ; gets DC and HL
+@blit_char: ; gets A - char, C - color and HL - screen mem
 	push b
 	push d
 	push h
 	push pcw
+
+	; calc actual char addr
+	push h
+	mvi h, 0
+	mov l, a
+	dad h ; * 2
+	dad h ; * 2
+	dad h ; * 2
+	lxi d, font
+	dad d
+	xchg
+	pop h
+
 	mvi b, 8h
 blit03loop:
 	ldax d
-	call @blit03b
+
+	call @blitb
+
 	inx d
-	mov a, l
+
+	mov a, l ; next screen line
 	adi 40h
 	jnc blit03no
 	inr h
 blit03no:
 	mov l, a
-	dcr b
+
+	dcr b ; do loop
 	jnz blit03loop
 
 	pop pcw
@@ -472,49 +544,50 @@ blit03no:
 	ret
 
 
-@blit03b:
+@blitb:
 	push b
 	push d
 	push h
-	push pcw
-
-	mov b, a
+	push psw
 
 	ani 11110000b
 	rrc
 	rrc
 	rrc
 	rrc
-	mov c, a ;now in c 0000xxxx
+	mov b, a ;now in b 0000xxxx
 
-	lxi d, clr03
+	lxi d, color_mask
 	mov a, e
-	add c
+	add b
 	mov e, a
 	ldax d ; now actual color
+	ana c
 	mov m, a	; draw 1 half bit
 
 	inx h ; next
 
-	mov a, b
-	ani 1111b
-	mov c, a ;now in c 0000xxxx
+	pop psw
+	push psw
 
-	lxi d, clr03
+	ani 1111b
+	mov b, a ;now in b 0000xxxx
+
+	lxi d, color_mask
 	mov a, e
-	add c
+	add b
 	mov e, a
 	ldax d ; now actual color
+	ana c
 	mov m, a	; draw 0 half bit
-	inx h ; next
 
-	push pcw
+	pop psw
 	pop h
 	pop d
 	pop b
 	ret
 
-clr03: ; black on white color table
+color_mask: ; black on white color table
 	db 00000000b
 	db 00000011b
 	db 00001100b
@@ -664,7 +737,8 @@ font:
     db 000h, 008h, 01Ch, 036h, 063h, 041h, 041h, 07Fh
 
 ; 忍
-	org 0A200h
+	org 07000h
+shinobu:
 	db 0, 0, 48, 0
 	ds 60
 	db 0, 3, 255, 255

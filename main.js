@@ -8,6 +8,17 @@ function randInt(min, max) {
 
 function SimpleMemio(conso, consi, conss, prn) {
     this.ram = new Uint8Array(0xFFFF)
+    this.key = 0
+}
+
+SimpleMemio.prototype.input = function(port) {
+    switch (port) {
+    case 0x00: return this.key
+    }
+    return 0
+}
+
+SimpleMemio.prototype.output = function(port, value) {
 }
 
 
@@ -149,6 +160,16 @@ var app = new Vue({
             window.video.render()
         },
 
+        down(i) {
+            console.log('down', i)
+            memio.key |= 1 << i
+        },
+
+        up(i) {
+            console.log('up', i)
+            memio.key &= ~(1 << i)
+        },
+
 
         commands() {
             let N = 0x10F
@@ -220,7 +241,11 @@ var app = new Vue({
             var self = this
             this.runned = true
             this.interval = setInterval(function () {
-                let i = randInt(200, 250)
+                if (!self.runned) {
+                    this.stop_cpu()
+                    return
+                }
+                let i = randInt(20000, 25000)
                 while (i--) {
                     if (self.runned) {
                         self.runned = cpu.step()
