@@ -282,6 +282,7 @@ td.three, .nb3 {
 }
 #asm-code-wrapper {
 	height: 100vh;
+width: 300px;
 }
 .CodeMirror {
 	height: 100% !important;
