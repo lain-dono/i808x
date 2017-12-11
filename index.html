@@ -380,6 +380,32 @@
 
 <div id='asm-code-wrapper'>
 	<textarea id='asm-code'>
+	call @rand
+	out 1
+	call @rand
+	out 0
+	call @rand
+	out 3
+	call @rand
+	out 14
+	call @rand
+	out 20
+	call @rand
+	out 48
+	call @rand
+	out 119
+	call @rand
+	out 134
+	call @rand
+	out 20
+	call @rand
+	out 251
+
+	call @rand
+	out 9
+	call @rand
+	out 84
+
 	lxi b, 02400h
 	lxi h, 0A000h
 	call @memzero
@@ -414,6 +440,74 @@ x_main:
 	jmp @main
 
 say_text: db 'Prepare Uranus!', 0
+
+
+; from http://www.electro-tech-online.com/threads/ultra-fast-pseudorandom-number-generator-for-8-bit.124249/
+rng_x: ds 1
+rng_a: ds 1
+rng_b: ds 1
+rng_c: ds 1
+
+;init_rng(s1,s2,s3) //Can also be used to seed the rng with more entropy during use.
+;{
+;//XOR new entropy into key state
+;a ^=s1;
+;b ^=s2;
+;c ^=s3;
+;
+;x++;
+;a = (a^c^x);
+;b = (b+a);
+;c = (c+(b>>1)^a);
+;}
+
+@rand:
+	push b
+	push d
+	push h
+
+	lxi h, rng_x
+	mov d, m ; x
+	inx h
+	mov e, m ; a
+	inx h
+	mov b, m ; b
+	inx h
+	mov c, m ; c
+
+	lxi h, rng_x
+
+	inr d        ; x++
+	mov m, d
+	inx h
+	mov a, d
+
+	mov a, e     ; a = a ^ c ^ x
+	xra c
+	xra d
+	mov e, a
+	mov m, e
+	inx h
+
+	mov a, b     ; b = b + a
+	add e
+	mov b, a
+	mov m, b
+	inx h
+
+	;ora a        ; clear carry
+	;rar          ; c = (c + (b >> 1)) ^ a
+	rrc
+
+	add c
+	xra e
+	mov c, a
+	mov m, c
+
+	pop h
+	pop d
+	pop b
+	ret
 
 ; memcpy --
 ; Copy a block of memory from one location to another.

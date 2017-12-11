@@ -19,6 +19,7 @@ SimpleMemio.prototype.input = function(port) {
 }
 
 SimpleMemio.prototype.output = function(port, value) {
+    console.log('output', port, value);
 }
 
 
